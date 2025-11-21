@@ -1,16 +1,24 @@
-import { Field, Form, Formik } from "formik";
+import { 
+  Field, 
+  Form, 
+  Formik
+} from "formik";
 import * as Yup from "yup";
+import useModal from "../../../hooks/useModal";
 import FilledButton from "../../../components/Buttons/FilledButton";
 import { useStore } from "../../../store/useStore";
-import { useNavigate } from "react-router";
 import { Link } from "react-router-dom";
 import { ROUTES } from "../../../routes/routes";
 import OutlinedInput from "../../../components/Inputs/OutlinedInput";
+import SignupModal from "./SignupModal";
 
 export const LoginForm: React.FC<{}> = () => {
+  const { pushModal } = useModal();
   const isSignInLoading = useStore((state) => state.auth.is_signin_loading);
   const signIn = useStore((state) => state.auth.signIn);
-  const navigate = useNavigate();
+  const openSignupModal = () => {
+    pushModal(<SignupModal/>);
+  };
 
   return (
     <Formik
@@ -25,7 +33,7 @@ export const LoginForm: React.FC<{}> = () => {
         remember_session: Yup.boolean(),
       })}
       onSubmit={(values) => {
-        signIn(values, navigate);
+        signIn(values, pushModal);
       }}
     >
       <Form>
@@ -49,6 +57,14 @@ export const LoginForm: React.FC<{}> = () => {
             loading={isSignInLoading}
           >
             Entrar
+          </FilledButton>
+          <FilledButton
+            className="w-full"
+            type="button"
+            loading={isSignInLoading}
+            onClick={openSignupModal}
+          >
+            Não tenho uma conta
           </FilledButton>
           <Link to={ROUTES.FORGOT_PASSWORD.PATH} className="font-bold">
             Esqueci minha senha

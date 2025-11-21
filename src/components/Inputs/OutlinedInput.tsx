@@ -27,18 +27,18 @@ const OutlinedInput: React.FC<FieldProps & OutlinedInputProps> = ({
   return loading ? (
     <Skeleton height={24} className="mt-[-10px]" width="100%" />
   ) : (
-      <div className="flex flex-col gap-[-2px]">
-          <span className="text-gray_2">{props.placeholder}</span>
-          <input
-            {...field}
-            {...props}
-            placeholder=" "
-            className={`w-full border ${props.className}`}
-          />
-          {fieldTouched && fieldError ? (
-            <div className="text-red text-sm text-left">{fieldError as string}</div>
-          ) : null}
-      </div>
+    <div className="flex flex-col gap-[-2px]">
+      <span className="text-gray_2">{props.placeholder}</span>
+      <input
+        {...field}
+        {...props}
+        placeholder=" "
+        className={`w-full border ${props.className}`}
+      />
+      {fieldTouched && fieldError ? (
+        <div className="text-red text-sm text-left">{fieldError as string}</div>
+      ) : null}
+    </div>
   );
 };
 

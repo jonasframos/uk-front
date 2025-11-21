@@ -1,4 +1,3 @@
-
 import axios, { AxiosError } from 'axios';
 
 const axiosInstanceParams = (base_url: string | undefined) => {
@@ -20,7 +19,7 @@ export let back_api = axios.create(
 );
 
 export const api_public = axios.create({
-  baseURL: process.env.REACT_APP_API_URL,
+  baseURL: process.env?.REACT_APP_API_URL,
   headers: {
     "Content-Type": "application/json",
     "accept-language": "pt-br",
