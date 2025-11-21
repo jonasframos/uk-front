@@ -1,8 +1,6 @@
 import React from "react";
 import { FieldProps, getIn } from "formik";
-import "./customOutlinedInputStyle.css";
 import Skeleton from "react-loading-skeleton";
-import { s } from "framer-motion/dist/types.d-CtuPurYT";
 
 interface OutlinedInputProps {
   className: string;
@@ -30,19 +28,16 @@ const OutlinedInput: React.FC<FieldProps & OutlinedInputProps> = ({
     <Skeleton height={24} className="mt-[-10px]" width="100%" />
   ) : (
       <div className="flex flex-col gap-[-2px]">
-        <label className={`float-label-input w-full ${props.labelClassName}`}>
+          <span className="text-gray_2">{props.placeholder}</span>
           <input
             {...field}
             {...props}
             placeholder=" "
-            className={`border-b outline-none border-gray_1 w-full ${props.className}`}
+            className={`w-full border ${props.className}`}
           />
-          <span className="text-gray_2">{props.placeholder}</span>
           {fieldTouched && fieldError ? (
             <div className="text-red text-sm text-left">{fieldError as string}</div>
           ) : null}
-        </label>
-        {subtitle && (<p className="text-gray_2 text-[9pt]">{subtitle}</p>)}
       </div>
   );
 };

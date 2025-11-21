@@ -1,0 +1,1 @@
+export { default as LoginBgImage } from './map-light.jpg';

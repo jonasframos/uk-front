@@ -28,7 +28,7 @@ const FilledButton: React.FC<FilledButtonProps> = ({
     <button
       onClick={handleClick}
       {...props}
-      className={loading ? `bg-gray_1 rounded-[8px] py-3 cursor-wait ${className}` : `bg-red text-white rounded-[8px] uppercase text-sm font-semibold py-3 hover:bg-[#bf1a20] transition duration-200 ease-in-out ${className}`}
+      className={loading ? `bg-gray_05 py-3 cursor-wait ${className}` : `bg-gray_05 text-sm font-semibold py-3 hover:bg-gray_1 transition duration-200 ease-in-out ${className}`}
     >
       {loading ? '' : icon}
       {loading ? '' : children}

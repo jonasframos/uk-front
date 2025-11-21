@@ -12,18 +12,18 @@ import { NavigateFunction } from "react-router-dom";
 
 export const createAuthSlice: StateCreator<AuthState> = (set, get) => ({
   auth: {
-    isSignInLoading: false,
-    signIn: (signInData, navigate) => {
+    is_signin_loading: false,
+    signIn: (sign_in_data, navigate) => {
       set(
         produce((state) => {
-          state.auth.isSignInLoading = true;
+          state.auth.is_signin_loading = true;
         })
       );
 
       authService
-        .signIn({ cpf: signInData.cpf, password: signInData.password })
+        .signIn({ email_username: sign_in_data.email_username, password: sign_in_data.password })
         .then((token) => {
-          if(signInData.rememberSession) {
+          if(sign_in_data.remember_session) {
             localStorage.setItem("token", token);
           } else {
             localStorage.removeItem("token");
@@ -38,7 +38,7 @@ export const createAuthSlice: StateCreator<AuthState> = (set, get) => ({
         .finally(() => {
           set(
             produce((state: StoreState) => {
-              state.auth.isSignInLoading = false;
+              state.auth.is_signin_loading = false;
             })
           );
         });

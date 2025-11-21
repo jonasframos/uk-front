@@ -1,7 +1,7 @@
 import { api_public } from "../api/api";
 import { handleServiceError } from "./handleServiceError";
 
-type SignInRequestBody = { cpf: string; password: string };
+type SignInRequestBody = { email_username: string; password: string };
 
 const authService = {
   signIn: async (credentials: SignInRequestBody) => {

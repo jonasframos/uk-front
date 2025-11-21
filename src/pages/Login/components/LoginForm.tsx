@@ -1,62 +1,46 @@
 import { Field, Form, Formik } from "formik";
 import * as Yup from "yup";
-import FilledButton from "../../../components/FilledButton/FilledButton";
-import OutlinedInput from "../../../components/FormComponents/OutlinedInput/OutlinedInput";
-import ToggleSwitch from "../../../components/FormComponents/ToggleSwitch";
+import FilledButton from "../../../components/Buttons/FilledButton";
 import { useStore } from "../../../store/useStore";
 import { useNavigate } from "react-router";
 import { Link } from "react-router-dom";
 import { ROUTES } from "../../../routes/routes";
-import OutlinedMaskedInput from "../../../components/FormComponents/OutlinedMaskedInput/OutlinedMaskedInput";
-import { removeNumberMask } from "../../../utils/functions/formatters";
+import OutlinedInput from "../../../components/Inputs/OutlinedInput";
 
 export const LoginForm: React.FC<{}> = () => {
-  const isSignInLoading = useStore((state) => state.auth.isSignInLoading);
+  const isSignInLoading = useStore((state) => state.auth.is_signin_loading);
   const signIn = useStore((state) => state.auth.signIn);
   const navigate = useNavigate();
 
   return (
     <Formik
       initialValues={{
-        cpf: "",
+        email_username: "",
         password: "",
-        rememberSession: false,
+        remember_session: false,
       }}
       validationSchema={Yup.object().shape({
-        cpf: Yup.string()
-          .matches(
-            /\d{2}\.\d{3}\.\d{3}-\d{2}$/,
-            "O CPF deve conter exatamente 11 números"
-          )
-          .required("Campo obrigatório"),
+        email_username: Yup.string().required("Campo obrigatório"),
         password: Yup.string().required("Campo obrigatório"),
-        rememberSession: Yup.boolean(),
+        remember_session: Yup.boolean(),
       })}
       onSubmit={(values) => {
-        const newValues = { ...values, cpf: removeNumberMask(values.cpf) };
-        signIn(newValues, navigate);
+        signIn(values, navigate);
       }}
     >
       <Form>
         <div className="flex flex-col gap-8">
           <Field
-            placeholder="Login"
-            name="cpf"
-            component={OutlinedMaskedInput}
-            mask="999.999.999-99"
-            alwaysShowMask={false}
+            placeholder="Email ou Usuário"
+            name="email_username"
+            component={OutlinedInput}
           />
-          <div className="flex flex-col gap-5 item text-left">
+          <div className="flex flex-col gap-8">
             <Field
               placeholder="Senha"
               name="password"
               type="password"
               component={OutlinedInput}
-            />
-            <Field
-              name="rememberSession"
-              component={ToggleSwitch}
-              label="Lembrar"
             />
           </div>
           <FilledButton
@@ -66,7 +50,7 @@ export const LoginForm: React.FC<{}> = () => {
           >
             Entrar
           </FilledButton>
-          <Link to={ROUTES.FORGOT_PASSWORD.PATH} className="text-red font-bold">
+          <Link to={ROUTES.FORGOT_PASSWORD.PATH} className="font-bold">
             Esqueci minha senha
           </Link>
         </div>
