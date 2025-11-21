@@ -1,0 +1,102 @@
+label.float-label-input {
+  position: relative;
+  display: inline-block;
+}
+
+label.float-label-input span {
+  padding: 0px;
+  pointer-events: none;
+  position: absolute;
+  left: 0px;
+  top: 0;
+  transition: 0.2s;
+  transition-timing-function: ease;
+  transition-timing-function: cubic-bezier(0.25, 0.1, 0.25, 1);
+}
+
+label.float-label-input input {
+  padding: 0px 0 4px 0;
+  outline: none;
+}
+
+label.float-label-input input:focus + span,
+input:not(:placeholder-shown) + span {
+  opacity: 1;
+  font-size: 11px;
+  top: -14px
+}
+
+/* For IE Browsers*/
+label.float-label-input input:focus + span,
+input:not(:-ms-input-placeholder) + span {
+  opacity: 1;
+  font-size: 11px;
+  top: -14px
+}
+
+
+label.float-label-select {
+  position: relative;
+  display: block;
+}
+
+label.float-label-select span {
+  padding: 0px;
+  pointer-events: none;
+  position: absolute;
+  left: 0px;
+  top: 0;
+  transition: 0.2s;
+  transition-timing-function: ease;
+  transition-timing-function: cubic-bezier(0.25, 0.1, 0.25, 1);
+}
+
+label.float-label-select select {
+  padding: 0px 0 4px 0;
+  outline: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  background-repeat: no-repeat, repeat;
+  background-position: right .7em top 50%, 0 0;
+  background-size: .65em auto, 100%;
+}
+
+label.float-label-select select ~ span:not(.empty) {
+  opacity: 1;
+  font-size: 11px;
+  top: -14px
+}
+
+label.float-label-select select[value=""] ~ span.empty {
+  opacity: 1;
+  font-size: 14px;
+  top: 0px;
+}
+
+label.bordered-select {
+  position: relative;
+  display: block;
+}
+
+label.bordered-select span {
+  padding: 0px;
+  pointer-events: none;
+  position: absolute;
+  left: 0px;
+  top: 0;
+  transition: 0.2s;
+  transition-timing-function: ease;
+  transition-timing-function: cubic-bezier(0.25, 0.1, 0.25, 1);
+}
+
+label.bordered-select select {
+  padding: 5px 24px 5px 10px;
+  outline: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  background-repeat: no-repeat, repeat;
+  background-position: right .7em top 50%, 0 0;
+  background-size: .65em auto, 100%;
+}

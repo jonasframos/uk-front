@@ -1,0 +1,118 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+@import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+
+:root {
+  --toastify-icon-color-error: #DA1E27 !important; 
+  --toastify-color-progress-error: #DA1E27 !important;
+  --toastify-icon-color-success: #4CAF50 !important; 
+  --toastify-color-progress-success: #4CAF50 !important;
+}
+
+.react-datepicker-popper {
+  z-index: 20 !important;
+}
+
+.react-datepicker__day--keyboard-selected, .react-datepicker__day--selected {
+  background-color: #DA1E27 !important;
+  color: white !important;
+  font-weight: bold !important;
+}
+
+.react-datepicker__month-text--selected, .react-datepicker__month-text--keyboard-selected {
+  background-color: #DA1E27 !important;
+  color: white !important;
+  font-weight: bold !important;
+}
+
+.react-datepicker__navigation {
+  top: 15px !important;
+}
+
+.react-datepicker__header {
+  background-color: rgb(246, 246, 246) !important;
+  font-family: 'Inter', serif !important;
+  padding-top: 15px !important;
+  text-transform: capitalize !important;
+}
+
+.react-datepicker__day-name {
+  font-family: 'Inter', serif !important;
+  margin: 7px !important;
+  margin-top: 10px !important;
+}
+
+.react-datepicker__day {
+  margin: 7px !important;
+  font-family: 'Inter', serif !important;
+}
+
+.react-datepicker, .react-datepicker__month-container {
+  width: 320px !important;
+  box-sizing: content-box !important;
+  border: none !important;
+  --tw-shadow: 0px 2px 6px 0px #00000040;
+  --tw-shadow-colored: 0px 2px 6px 0px var(--tw-shadow-color);
+  box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow);
+}
+
+.react-datepicker__month {
+  font-family: 'Inter', serif !important;
+  text-transform: capitalize !important;
+}
+
+.react-datepicker__month-wrapper {
+  width: 100% !important;
+  font-family: 'Inter', serif !important; 
+}
+
+.react-datepicker__month-text {
+  margin: 8px !important;
+  padding-top: 5px !important;
+  padding-bottom: 5px !important;
+}
+
+.p-datatable .p-datatable-tbody > tr.p-highlight {
+  background-color: #ffeff0 !important;
+  color: #000 !important;
+  transition: background-color 0.2s ease-in-out;
+}
+
+.p-datatable .p-datatable-tbody > tr.p-highlight:hover {
+  background-color: #ffeff0 !important;
+}
+
+/* ---- cabeçalho: aplica mesma cor quando a coluna está ordenada/reordenada ---- */
+/* estilo direto em th quando Prime aplica p-highlight */
+.p-datatable .p-datatable-thead > tr > th.p-highlight,
+.p-datatable .p-datatable-thead > tr > th.p-sortable-column.p-highlight {
+  background-color: #E9EAED !important;
+  color: #000 !important;
+  transition: background-color 0.2s ease-in-out;
+}
+.p-datatable .p-datatable-thead > tr > th.p-highlight:hover,
+.p-datatable .p-datatable-thead > tr > th.p-sortable-column.p-highlight:hover {
+  background-color: #E9EAED !important;
+}
+
+.p-overlaypanel {
+  background-color: transparent !important;
+  margin-top: -10px;
+  box-shadow: none;
+}
+.p-inputtext:enabled:focus {
+  box-shadow: 0 0 0 0 !important;
+}
+
+body {
+  margin: 0;
+  font-family: 'Inter', serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+    monospace;
+}
