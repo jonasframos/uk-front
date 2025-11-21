@@ -1,5 +1,3 @@
-import * as Icons from "../../assets/imgs";
-
 interface FilledButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   children: string[] | string | JSX.Element;
@@ -32,7 +30,7 @@ const FilledButton: React.FC<FilledButtonProps> = ({
       {...props}
       className={loading ? `bg-gray_1 rounded-[8px] py-3 cursor-wait ${className}` : `bg-red text-white rounded-[8px] uppercase text-sm font-semibold py-3 hover:bg-[#bf1a20] transition duration-200 ease-in-out ${className}`}
     >
-      {loading ? <Icons.LoadingIcon /> : icon}
+      {loading ? '' : icon}
       {loading ? '' : children}
     </button>
   ) : null;

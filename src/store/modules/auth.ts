@@ -1,6 +1,6 @@
 import produce from "immer";
 import authService from "../../services/authService";
-import { chartsAPI, fleetAPI, payRollAPI, trackingAPI, userAPI, reportAPI } from "../../api/api";
+import { back_api } from "../../api/api";
 import { StateCreator } from "zustand";
 import { ROUTES } from "../../routes/routes";
 import { AuthState } from "../types/auth";
@@ -30,19 +30,7 @@ export const createAuthSlice: StateCreator<AuthState> = (set, get) => ({
             sessionStorage.setItem("token", token);
           }
           const adminData = get().auth.fillAdminDataFromToken(token);
-          if(adminData.position.type === "MASTER") {
-            navigate(ROUTES.DASHBOARD.PATH, { state: { openChangeCompanyModal: true } });
-          }
-          else if((adminData.position.type === "DRIVER") || (adminData.position.type === "EMPLOYEE")) {
-            toast.error("Usuário sem permissão de acesso");
-            get().auth.logout(navigate);
-            return ;
-          } else if(adminData.position.type === "MANAGER") {
-            navigate(ROUTES.DASHBOARD.PATH);
-          }
-          else {
-            navigate(ROUTES.COLLABORATORS.PATH);
-          }
+          navigate(ROUTES.OVERVIEW.PATH);
         })
         .catch((error) => {
           toast.error(error.message);
@@ -58,10 +46,7 @@ export const createAuthSlice: StateCreator<AuthState> = (set, get) => ({
     logout: (navigate?: NavigateFunction) => {
       localStorage.clear();
       sessionStorage.clear();
-      userAPI.defaults.headers.Authorization = "";
-      fleetAPI.defaults.headers.Authorization = "";
-      payRollAPI.defaults.headers.Authorization = "";
-      chartsAPI.defaults.headers.Authorization = "";
+      back_api.defaults.headers.Authorization = "";
       
       if(navigate) navigate('/')
       else window.location.href = "/";
@@ -84,12 +69,7 @@ export const createAuthSlice: StateCreator<AuthState> = (set, get) => ({
           }
         })
       );
-      userAPI.defaults.headers.Authorization = `Bearer ${token}`;
-      fleetAPI.defaults.headers.Authorization = `Bearer ${token}`;
-      payRollAPI.defaults.headers.Authorization = `Bearer ${token}`;
-      chartsAPI.defaults.headers.Authorization = `Bearer ${token}`;
-      trackingAPI.defaults.headers.Authorization = `Bearer ${token}`;
-      reportAPI.defaults.headers.Authorization = `Bearer ${token}`;
+      back_api.defaults.headers.Authorization = `Bearer ${token}`;
       return adminData;
     },
   },

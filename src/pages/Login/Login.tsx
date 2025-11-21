@@ -2,7 +2,7 @@ import { LoginForm } from './components/LoginForm';
 
 const Login = () => {
   return (
-    <main className='min-h-screen bg-[url(./assets/images/institucional/black-background.jpg)] bg-cover bg-center bg-no-repeat flex flex-col gap-10 justify-center items-center'>
+    <main className='min-h-screen bg-cover bg-center bg-no-repeat flex flex-col gap-10 justify-center items-center'>
       <div className='bg-white px-6 py-8 rounded-[12px] text-gray_3 md:w-[408px] text-center'>
         <h1 className='text-2xl font-bold mb-5'>Entre com suas credenciais</h1>
         <LoginForm />

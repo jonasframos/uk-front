@@ -1,12 +1,10 @@
 {
-  "name": "jornada_sat_frontend",
+  "name": "uk_front",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "@amcharts/amcharts5": "5.6.1",
     "@emotion/react": "11.14.0",
     "@googlemaps/react-wrapper": "1.1.35",
-    "@hotjar/browser": "^1.0.9",
     "@react-spring/web": "^10.0.2",
     "@testing-library/jest-dom": "5.17.0",
     "@testing-library/react": "13.4.0",
@@ -16,12 +14,10 @@
     "@types/node": "16.18.46",
     "@types/react": "18.2.21",
     "@types/react-dom": "18.2.7",
-    "@vis.gl/react-google-maps": "1.0.2",
     "axios": "1.4.0",
     "date-fns": "2.30.0",
     "formik": "2.4.3",
-    "framer-motion": "^12.12.2",
-    "iconsax-react": "0.0.8",
+    "framer-motion": "12.12.2",
     "jwt-decode": "3.1.2",
     "moment": "2.29.4",
     "primereact": "10.9.2",
@@ -70,7 +66,7 @@
   },
   "devDependencies": {
     "@babel/plugin-proposal-private-property-in-object": "7.21.11",
-    "@types/react-beautiful-dnd": "^13.1.8",
+    "@types/react-beautiful-dnd": "13.1.8",
     "@types/react-datepicker": "4.19.0",
     "@types/react-text-mask": "5.4.14",
     "axios-mock-adapter": "1.21.5"

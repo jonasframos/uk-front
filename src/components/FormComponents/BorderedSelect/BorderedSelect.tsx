@@ -28,7 +28,7 @@ const BorderedSelect: React.FC<FieldProps & BorderedSelectProps> = ({
       <select
         {...field}
         {...props}
-        className={`bg-white bg-[url(./assets/imgs/chevron-down.svg)] border rounded-[8px]  outline-none border-gray_1 w-full px-5 ${props.className}`}
+        className={`bg-white border rounded-[8px]  outline-none border-gray_1 w-full px-5 ${props.className}`}
       >
         <option value=""></option>
         {options.map((option) => (

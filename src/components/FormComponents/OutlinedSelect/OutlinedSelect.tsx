@@ -30,7 +30,7 @@ const OutlinedSelect: React.FC<FieldProps & OutlinedSelectProps> = ({
       <select
         {...field}
         {...props}
-        className={`bg-white bg-[url(./assets/imgs/chevron-down.svg)] pl-[-5px] border-b outline-none border-gray_1 w-full ${props.className}`}
+        className={`bg-white pl-[-5px] border-b outline-none border-gray_1 w-full ${props.className}`}
       >
         {allowEmptyOption ? <option value=""></option> : null}
         {options.map((option) => (
