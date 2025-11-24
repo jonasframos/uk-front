@@ -49,7 +49,12 @@ const ServerSelectionDataTable: React.FC<DataTableProps> = ({
                             <td>
                                 {
                                     server.player_info ? 
-                                    '123' :
+                                    <FilledButton
+                                        className="px-3"
+                                        onClick={() => onSwitchServer(server)}
+                                    >
+                                        Entrar
+                                    </FilledButton> :
                                     <FilledButton
                                         className="px-3"
                                         onClick={() => onSwitchServer(server)}

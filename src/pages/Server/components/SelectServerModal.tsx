@@ -4,8 +4,11 @@ import { useStore } from '../../../store/useStore';
 import ServerSelectionDataTable from '../../../components/Datatables/ServerSelectionDatatable';
 import FilledButton from '../../../components/Buttons/FilledButton';
 import { Server } from '../../../store/types/server';
+import { useNavigate } from 'react-router-dom';
+import { ROUTES } from '../../../routes/routes';
 
 const SelectServerModal: React.FC<{}> = () => {
+  const navigate = useNavigate();
   const servers = useStore(
     (state) => state.server.servers_list.data
   );
@@ -21,6 +24,8 @@ const SelectServerModal: React.FC<{}> = () => {
   const handleSwitchServer = async (server: Server) => {
     await switchServer(server._id);
     if(!server.player_info) await createPlayer();
+    useStore.getState().modal.clearModals();
+    navigate(ROUTES.MAP.PATH);
   };
 
   useEffect(() => {
