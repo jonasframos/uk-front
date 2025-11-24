@@ -19,6 +19,6 @@ export interface ServerState {
     is_loading_servers: boolean;
     is_switching_server: boolean;
     getServers: () => void;
-    switchServer: (id: string) => void;
+    switchServer: (id: string) => Promise<void>;
   };
 }

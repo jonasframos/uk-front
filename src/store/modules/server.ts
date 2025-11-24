@@ -50,7 +50,7 @@ export const createServerSlice: StateCreator<ServerState> = (set, get) => ({
 
       const server_data = get().server.servers_list.data.find((server) => server._id === id);
 
-      serverService.switch(id)
+      return serverService.switch(id)
       .then((data) => {
         const token = data.token;
         set(

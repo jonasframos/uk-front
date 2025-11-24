@@ -4,7 +4,7 @@ import { handleServiceError } from './handleServiceError';
 const playerService = {
   create: async () => {
     try {
-      const response = await back_api.get('/v1/server');
+      const response = await back_api.post('/v1/player');
       const data = response.data.data;
 
       return data;
@@ -14,4 +14,4 @@ const playerService = {
   }
 };
 
-export default serverService;
+export default playerService;

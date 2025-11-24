@@ -1,22 +1,15 @@
 import { Server } from "../../store/types/server";
-import { useStore } from "../../store/useStore";
 import FilledButton from "../Buttons/FilledButton";
 
 interface DataTableProps {
   data: Server[];
+  onSwitchServer: (server: Server) => void;
 }
 
 const ServerSelectionDataTable: React.FC<DataTableProps> = ({
-    data
+    data,
+    onSwitchServer
 }) => {
-
-    const switchServer = useStore(
-        (state) => state.server.switchServer
-    );
-    const handleServerSelect = (id: string) => {
-        switchServer(id);
-    };
-
     return (
         <div className="overflow-hidden rounded-lg shadow-lg">
             <table className="w-full bg-white">
@@ -59,8 +52,10 @@ const ServerSelectionDataTable: React.FC<DataTableProps> = ({
                                     '123' :
                                     <FilledButton
                                         className="px-3"
-                                        onClick={() => handleServerSelect(server._id)}
-                                    >Selecionar</FilledButton>
+                                        onClick={() => onSwitchServer(server)}
+                                    >
+                                        Selecionar
+                                    </FilledButton>
                                 }
                             </td>
                         </tr>
