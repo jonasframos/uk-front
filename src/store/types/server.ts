@@ -1,5 +1,5 @@
 export interface Server {
-  _id: string;
+  id: string;
   name: string;
   tag?: string;
   players_count?: number;
@@ -7,6 +7,7 @@ export interface Server {
     points: number;
     cities: number;
     server: string;
+    username: string;
   };
 }
 

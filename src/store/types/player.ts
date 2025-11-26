@@ -1,6 +1,7 @@
 export interface Player {
-  _id: string;
-  name: string;
+  username: string;
+  points: number;
+  cities: string[];
 }
 
 export interface PlayerState {

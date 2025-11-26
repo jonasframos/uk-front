@@ -22,7 +22,7 @@ const SelectServerModal: React.FC<{}> = () => {
     (state) => state.server.switchServer
   );
   const handleSwitchServer = async (server: Server) => {
-    await switchServer(server._id);
+    await switchServer(server.id);
     if(!server.player_info) await createPlayer();
     useStore.getState().modal.clearModals();
     navigate(ROUTES.MAP.PATH);
