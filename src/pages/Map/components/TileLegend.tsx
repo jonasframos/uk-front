@@ -1,4 +1,4 @@
-import { TerrainType } from "../../../utils/constants/constants";
+import { TerrainType } from '../../../utils/constants/constants';
 
 export interface TileLegendProps {
     available_types: TerrainType[];
@@ -8,7 +8,7 @@ const TileLegend: React.FC<TileLegendProps> = ({
     available_types 
 }) => {
     return (
-        <div className="w-[300px] shadow">
+        <div className='w-full shadow'>
             <span>Terreno</span>
             <hr />
             <table>

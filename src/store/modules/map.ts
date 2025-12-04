@@ -8,6 +8,8 @@ export const createMapSlice: StateCreator<MapState> = (set, get) => ({
   map: {
     is_loading_map: false,
     is_loading_map_info: false,
+    show_grid: localStorage.getItem('show_grid') === 'false' ? false : true,
+    show_minimap: localStorage.getItem('show_minimap') === 'false' ? false : true,
     selected_map: null,
     setLoadingMap(is_loading: boolean) {
       set(
@@ -40,6 +42,22 @@ export const createMapSlice: StateCreator<MapState> = (set, get) => ({
           })
         );
       }
+    },
+    setShowGrid(show_grid: boolean) {
+      set(
+        produce((state) => {
+          state.map.show_grid = show_grid;
+          localStorage.setItem('show_grid', show_grid.toString());
+        })
+      );
+    },
+    setShowMinimap(show_minimap: boolean) {
+      set(
+        produce((state) => {
+          state.map.show_minimap = show_minimap;
+          localStorage.setItem('show_minimap', show_minimap.toString());
+        })
+      );
     }
   }
 });

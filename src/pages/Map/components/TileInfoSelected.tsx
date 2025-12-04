@@ -1,10 +1,19 @@
+import { useNavigate } from "react-router-dom";
+import FilledButton from "../../../components/Buttons/FilledButton";
+import { ROUTES } from "../../../routes/routes";
 import { MapTile } from "../../../store/types/map";
+import { City } from "../../../store/types/city";
 
-export interface TileInfoProps {
+export interface TileInfoSelectedProps {
     data: MapTile;
 }
 
-const TileInfo: React.FC<TileInfoProps> = ({ data }) => {
+const TileInfoSelected: React.FC<TileInfoSelectedProps> = ({ data }) => {
+    const navigate = useNavigate();
+    const handle_city_overview_click = (city: City) => {
+        localStorage.setItem('selected_city', city._id);
+        navigate(ROUTES.CITY.PATH);
+    }
     return (
         <div className="w-full p-4 rounded-lg text-black flex flex-col gap-2 bg-white">
             <span>Informações</span>
@@ -17,8 +26,9 @@ const TileInfo: React.FC<TileInfoProps> = ({ data }) => {
             { data.tile_info.owned_by?.player?.points && <span>Pontuação: {data.tile_info.owned_by.player.points}</span> }
             { data.tile_info.owned_by?.city?.level && <span>Nível: {data.tile_info.owned_by.city.level}</span> }
             { data.tile_info.owned_by?.city?.points && <span>Pontuação: {data.tile_info.owned_by.city.points}</span> }
+            { data.tile_info.owned_by?.city && <FilledButton onClick={() => handle_city_overview_click(data.tile_info.owned_by?.city)}>More Info</FilledButton>}
         </div>
     );
 }
 
-export default TileInfo;
+export default TileInfoSelected;

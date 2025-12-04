@@ -3,6 +3,7 @@ import { ROUTES } from "./routes";
 import ProtectedRoute from "./ProtectedRoute";
 import Login from "../pages/Login/Login";
 import Map from "../pages/Map/Map";
+import City from "../pages/City/City";
 import Insitucional from "../pages/Institutional/intitutional-page";
 
 export const RoutesComponent: React.FC = () => {
@@ -15,6 +16,7 @@ export const RoutesComponent: React.FC = () => {
       <Route element={<ProtectedRoute />}>
         <>
         <Route path={ROUTES.MAP.PATH} element={<Map />} />
+        <Route path={ROUTES.CITY.PATH} element={<City />} />
           {/* <Route path={ROUTES.DASHBOARD.PATH} element={<Dashboard />} />
           <Route path="/nao-encontrada" element={<NotFound />} /> */}
         </>

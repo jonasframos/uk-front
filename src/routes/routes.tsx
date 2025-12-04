@@ -3,6 +3,7 @@ export const ROUTES = {
   INSTITUTIONAL: { PATH: "/", NAME: "Institucional" },
   LOGIN: { PATH: "/login", NAME: "Login" },
   MAP: { PATH: "/map", NAME: "Map" },
+  CITY: { PATH: "/city", NAME: "City" },
   OVERVIEW: { PATH: "/overview", NAME: "Overview" }
 };
 

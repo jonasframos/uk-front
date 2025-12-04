@@ -56,7 +56,6 @@ export const createServerSlice: StateCreator<ServerState> = (set, get) => ({
         set(
           produce((state) => {
             state.server.selected_server = server_data;
-            state.player.current_player = server_data?.player_info || null;
             state.auth.fillAdminDataFromToken(token);
           })
         );

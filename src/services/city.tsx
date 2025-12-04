@@ -1,10 +1,10 @@
 import { back_api } from '../api/api';
 import { handleServiceError } from './handleServiceError';
 
-const playerService = {
-  getMe: async () => {
+const cityService = {
+  get: async (id: string) => {
     try {
-      const response = await back_api.get('/v1/player/me');
+      const response = await back_api.get(`/v1/city/${id}`);
       const data = response.data.data;
 
       return data;
@@ -14,4 +14,4 @@ const playerService = {
   }
 };
 
-export default playerService;
+export default cityService;

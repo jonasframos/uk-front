@@ -7,15 +7,15 @@ import playerService from '../../services/player';
 export const createPlayerSlice: StateCreator<PlayerState> = (set, get) => ({
   player: {
     current_player: null,
-    is_creating_player: false,
-    createPlayer: () => {
+    is_loading_player: false,
+    getMe: () => {
       set(
         produce((state) => {
-          state.player.is_creating_player = true;
+          state.player.is_loading_player = true;
         })
       );
 
-      return playerService.create()
+      return playerService.getMe()
       .then((data: Player) => {
         set(
           produce((state) => {
@@ -29,7 +29,7 @@ export const createPlayerSlice: StateCreator<PlayerState> = (set, get) => ({
       .finally(() => {
         set(
           produce((state) => {
-            state.player.is_creating_player = false;
+            state.player.is_loading_player = false;
           })
         );
       });

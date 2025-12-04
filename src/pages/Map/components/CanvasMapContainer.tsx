@@ -4,33 +4,29 @@ import {
     useCallback,
     useState
 } from 'react';
-import { useStore } from '../../store/useStore';
-import TileInfo from '../../pages/Map/components/TileInfo';
-import PlayerInfo from '../../pages/Map/components/PlayerInfo';
+import { useStore } from '../../../store/useStore';
+import TileInfo from './TileInfo';
+import PlayerInfo from './PlayerInfo';
+import MapControls from './MapControls';
+import TileInfoSelected from './TileInfoSelected';
 
-interface CanvasMapContainerProps {
-    image_url: string;
-    show_grid: boolean;
-    show_minimap: boolean;
-}
 
-const CanvasMapContainer: React.FC<CanvasMapContainerProps> = ({
-    image_url,
-    show_grid,
-    show_minimap
-}) => {
+const CanvasMapContainer: React.FC<{}> = () => {
     const setLoadingMap = useStore((state) => state.map.setLoadingMap);
     const is_loading_map = useStore((state) => state.map.is_loading_map);
     const selected_map = useStore((state) => state.map.selected_map);
     const player_info = useStore((state) => state.player.current_player);
+    const show_grid = useStore((state) => state.map.show_grid);
+    const show_minimap = useStore((state) => state.map.show_minimap);
+    const image_url = selected_map ? selected_map.image : '';
 
     const canvas_ref = useRef<HTMLCanvasElement>(null);
     const minimap_canvas_ref = useRef<HTMLCanvasElement>(null);
-    const grid_cache_canvas_ref = useRef<HTMLCanvasElement | null>(null);
+    const grid_cache_visible_ref = useRef<HTMLCanvasElement | null>(null);
+    const grid_cache_invisible_ref = useRef<HTMLCanvasElement | null>(null);
     const image_ref = useRef<HTMLImageElement | null>(null);
     const ctx_ref = useRef<CanvasRenderingContext2D | null>(null);
     const minimap_ctx_ref = useRef<CanvasRenderingContext2D | null>(null);
-    const grid_cache_ctx_ref = useRef<CanvasRenderingContext2D | null>(null);
     const cityImages = useRef<Map<string, HTMLImageElement>>(new Map());
     
     const offsetX = useRef(0);
@@ -47,11 +43,11 @@ const CanvasMapContainer: React.FC<CanvasMapContainerProps> = ({
     const renderGrid = useRef(true);
     const gridSize = useRef(50);
     const gridColor = useRef('#000000');
-    const gridOpacity = useRef(show_grid ? 0.2 : 0);
-    const gridOffsetX = useRef(23);
-    const gridOffsetY = useRef(-29);
+    const gridOffsetX = useRef(21);
+    const gridOffsetY = useRef(-32);
     const hexagons = useRef<Array<any>>([]);
     const gridCacheValid = useRef(false);
+    const showGridRef = useRef(show_grid);
     const hoveredHex = useRef<any>(null);
     const selectedHexagons = useRef<Map<string, any>>(new Map());
     const [hoveredHexagon, setHoveredHexagon] = useState<any>(null);
@@ -162,16 +158,22 @@ const CanvasMapContainer: React.FC<CanvasMapContainerProps> = ({
     const renderGridToCache = useCallback((image: HTMLImageElement) => {
         if (!image || !renderGrid.current || gridCacheValid.current) return;
         
-        // Create off-screen canvas for grid if needed
-        if (!grid_cache_canvas_ref.current) {
-            grid_cache_canvas_ref.current = document.createElement('canvas');
-            grid_cache_canvas_ref.current.width = image.width;
-            grid_cache_canvas_ref.current.height = image.height;
-            grid_cache_ctx_ref.current = grid_cache_canvas_ref.current.getContext('2d');
+        // Create off-screen canvases for both visible and invisible grids
+        if (!grid_cache_visible_ref.current) {
+            grid_cache_visible_ref.current = document.createElement('canvas');
+            grid_cache_visible_ref.current.width = image.width;
+            grid_cache_visible_ref.current.height = image.height;
         }
         
-        const cacheCtx = grid_cache_ctx_ref.current;
-        if (!cacheCtx) return;
+        if (!grid_cache_invisible_ref.current) {
+            grid_cache_invisible_ref.current = document.createElement('canvas');
+            grid_cache_invisible_ref.current.width = image.width;
+            grid_cache_invisible_ref.current.height = image.height;
+        }
+        
+        const visibleCtx = grid_cache_visible_ref.current.getContext('2d');
+        const invisibleCtx = grid_cache_invisible_ref.current.getContext('2d');
+        if (!visibleCtx || !invisibleCtx) return;
         
         const radius = gridSize.current;
         const hexWidth = radius * 2;
@@ -181,11 +183,19 @@ const CanvasMapContainer: React.FC<CanvasMapContainerProps> = ({
         
         hexagons.current = [];
         
-        // Clear cache canvas
-        cacheCtx.clearRect(0, 0, image.width, image.height);
-        cacheCtx.strokeStyle = gridColor.current;
-        cacheCtx.globalAlpha = gridOpacity.current;
-        cacheCtx.lineWidth = 1;
+        // Clear both cache canvases
+        visibleCtx.clearRect(0, 0, image.width, image.height);
+        invisibleCtx.clearRect(0, 0, image.width, image.height);
+        
+        // Setup for visible grid (opacity 0.3)
+        visibleCtx.strokeStyle = gridColor.current;
+        visibleCtx.globalAlpha = 0.2;
+        visibleCtx.lineWidth = 3;
+        
+        // Setup for invisible grid (opacity 0)
+        invisibleCtx.strokeStyle = gridColor.current;
+        invisibleCtx.globalAlpha = 0;
+        invisibleCtx.lineWidth = 3;
         
         const buffer = Math.max(hexWidth, hexHeight);
         const startX = -buffer + gridOffsetX.current;
@@ -215,16 +225,18 @@ const CanvasMapContainer: React.FC<CanvasMapContainerProps> = ({
                         }
                     };
                     hexagons.current.push(hexData);
-                    drawBasicHexagon(cacheCtx, x, y, radius);
+                    drawBasicHexagon(visibleCtx, x, y, radius);
+                    drawBasicHexagon(invisibleCtx, x, y, radius);
                 } 
                 rowIndex++;
             }
             colIndex++;
         }
         
-        cacheCtx.globalAlpha = 1.0;
+        visibleCtx.globalAlpha = 1.0;
+        invisibleCtx.globalAlpha = 1.0;
         gridCacheValid.current = true;
-    }, [drawBasicHexagon]);
+    }, [drawBasicHexagon, selected_map]);
 
     const getHexagonAtPoint = useCallback((canvasX: number, canvasY: number) => {
         // Convert canvas coordinates to image coordinates
@@ -315,7 +327,7 @@ const CanvasMapContainer: React.FC<CanvasMapContainerProps> = ({
         const canvas = canvas_ref.current;
         const ctx = ctx_ref.current;
         const image = image_ref.current;
-        const gridCache = grid_cache_canvas_ref.current;
+        const gridCache = showGridRef.current ? grid_cache_visible_ref.current : grid_cache_invisible_ref.current;
         
         if (!canvas || !ctx || !image) return;
         
@@ -332,7 +344,7 @@ const CanvasMapContainer: React.FC<CanvasMapContainerProps> = ({
         // Draw image
         ctx.drawImage(image, 0, 0);
         
-        // Draw cached grid
+        // Draw cached grid (visible or invisible based on showGridRef)
         if (renderGrid.current && gridCache && gridCacheValid.current) {
             ctx.drawImage(gridCache, 0, 0);
         }
@@ -516,6 +528,28 @@ const CanvasMapContainer: React.FC<CanvasMapContainerProps> = ({
     }, [draw, constrainViewBounds]);
 
     useEffect(() => {
+        // Update showGridRef and redraw when show_grid changes
+        showGridRef.current = show_grid;
+        draw();
+    }, [show_grid, draw]);
+
+    useEffect(() => {
+        // Initialize or update minimap canvas when show_minimap changes
+        if (show_minimap) {
+            const minimapCanvas = minimap_canvas_ref.current;
+            if (minimapCanvas) {
+                const minimapCtx = minimapCanvas.getContext('2d');
+                if (minimapCtx) {
+                    minimap_ctx_ref.current = minimapCtx;
+                    draw();
+                }
+            }
+        } else {
+            draw();
+        }
+    }, [show_minimap, draw]);
+
+    useEffect(() => {
         const canvas = canvas_ref.current;
         if (!canvas) return;
         
@@ -610,12 +644,14 @@ const CanvasMapContainer: React.FC<CanvasMapContainerProps> = ({
                 {show_minimap && (
                     <div style={{
                         position: 'absolute',
-                        bottom: '26px',
-                        right: '26px',
+                        bottom: '30px',
+                        right: '30px',
                         border: '2px solid #333',
                         borderRadius: '4px',
                         backgroundColor: 'rgba(0, 0, 0, 0.7)',
-                        boxShadow: '0 4px 6px rgba(0, 0, 0, 0.3)'
+                        boxShadow: '0 4px 6px rgba(0, 0, 0, 0.3)',
+                        pointerEvents: 'auto',
+                        zIndex: 2000
                     }}>
                         <canvas 
                             ref={minimap_canvas_ref}
@@ -634,7 +670,7 @@ const CanvasMapContainer: React.FC<CanvasMapContainerProps> = ({
                         left: `${Math.min(mousePosition.x + 20, window.innerWidth - 350)}px`,
                         top: `${Math.min(mousePosition.y + 20, window.innerHeight - 170)}px`,
                         pointerEvents: 'none',
-                        zIndex: 1001,
+                        zIndex: 2000,
                         width: '250px'
                     }}>
                         <TileInfo data={hoveredHexagon} />
@@ -645,11 +681,11 @@ const CanvasMapContainer: React.FC<CanvasMapContainerProps> = ({
                         position: 'fixed',
                         bottom: '30px',
                         left: '30px',
-                        pointerEvents: 'none',
-                        zIndex: 1001,
+                        pointerEvents: 'auto',
+                        zIndex: 2000,
                         width: '250px'
                     }}>
-                        <TileInfo data={selectedHexagon} />
+                        <TileInfoSelected data={selectedHexagon} />
                     </div>
                 )}
                 {player_info && (
@@ -657,13 +693,23 @@ const CanvasMapContainer: React.FC<CanvasMapContainerProps> = ({
                         position: 'fixed',
                         top: '30px',
                         left: '30px',
-                        pointerEvents: 'none',
-                        zIndex: 1001,
+                        pointerEvents: 'auto',
+                        zIndex: 2000,
                         width: '250px'
                     }}>
                         <PlayerInfo data={player_info} />
                     </div>
                 )}
+                 <div style={{
+                    position: 'fixed',
+                    top: '30px',
+                    left: '310px',
+                    pointerEvents: 'auto',
+                    zIndex: 2000,
+                    width: '250px'
+                }}>
+                    <MapControls show_grid={show_grid} show_minimap={show_minimap} />
+                </div>
             </div>
         </div>
     );

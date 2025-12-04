@@ -26,7 +26,11 @@ export interface MapState {
     is_loading_map: boolean;
     is_loading_map_info: boolean;
     selected_map: Map | null;
+    show_grid: boolean;
+    show_minimap: boolean;
     setLoadingMap(is_loading: boolean): void;
     getMap(): void;
+    setShowGrid(show_grid: boolean): void;
+    setShowMinimap(show_minimap: boolean): void;
   };
 }
