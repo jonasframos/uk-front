@@ -15,7 +15,7 @@ const ProtectedRoute: React.FC<{ redirectPath?: string }> = ({
   else fillAdminDataFromToken(token);
 
   return (
-    <div className="flex h-screen bg-gray_05">
+    <div className="flex h-screen bg-gray_05 justify-center">
       <Outlet />
     </div>
   );

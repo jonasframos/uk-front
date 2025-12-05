@@ -11,7 +11,8 @@ export interface TileInfoSelectedProps {
 const TileInfoSelected: React.FC<TileInfoSelectedProps> = ({ data }) => {
     const navigate = useNavigate();
     const handle_city_overview_click = (city: City) => {
-        localStorage.setItem('selected_city', city._id);
+        console.log(city)
+        localStorage.setItem('selected_city', city.id);
         navigate(ROUTES.CITY.PATH);
     }
     return (

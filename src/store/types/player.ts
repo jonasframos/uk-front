@@ -1,7 +1,10 @@
 export interface Player {
   username: string;
   points: number;
-  cities: string[];
+  cities: {
+    x: number;
+    y: number;
+  }[];
 }
 
 export interface PlayerState {

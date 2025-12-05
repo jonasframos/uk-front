@@ -19,7 +19,6 @@ const CanvasMapContainer: React.FC<{}> = () => {
     const show_grid = useStore((state) => state.map.show_grid);
     const show_minimap = useStore((state) => state.map.show_minimap);
     const image_url = selected_map ? selected_map.image : '';
-
     const canvas_ref = useRef<HTMLCanvasElement>(null);
     const minimap_canvas_ref = useRef<HTMLCanvasElement>(null);
     const grid_cache_visible_ref = useRef<HTMLCanvasElement | null>(null);
@@ -28,18 +27,17 @@ const CanvasMapContainer: React.FC<{}> = () => {
     const ctx_ref = useRef<CanvasRenderingContext2D | null>(null);
     const minimap_ctx_ref = useRef<CanvasRenderingContext2D | null>(null);
     const cityImages = useRef<Map<string, HTMLImageElement>>(new Map());
-    
     const offsetX = useRef(0);
     const offsetY = useRef(0);
     const scale = useRef(0.5);
     const minScale = useRef(0.5);
     const maxScale = useRef(1);
-    
+    let centerHexQ = 10;
+    let centerHexR = 10;
     const isDragging = useRef(false);
     const isClick = useRef(true);
     const lastMouseX = useRef(0);
     const lastMouseY = useRef(0);
-    
     const renderGrid = useRef(true);
     const gridSize = useRef(50);
     const gridColor = useRef('#000000');
@@ -464,14 +462,15 @@ const CanvasMapContainer: React.FC<{}> = () => {
             const hex = getHexagonAtPoint(mouseX, mouseY);
             if (hex) {
                 const coordKey = `${hex.q},${hex.r}`;
-                // Toggle selection: if already selected, unselect it; otherwise select it
                 if (selectedHexagons.current.has(coordKey)) {
                     selectedHexagons.current.delete(coordKey);
                     setSelectedHexagon(null);
                 } else {
-                    selectedHexagons.current.clear();
-                    selectedHexagons.current.set(coordKey, hex);
-                    setSelectedHexagon(hex);
+                    if(hex.tile_info?.owned_by?.city) {
+                        selectedHexagons.current.clear();
+                        selectedHexagons.current.set(coordKey, hex);
+                        setSelectedHexagon(hex);
+                    }
                 }
                 draw();
             }
@@ -482,34 +481,35 @@ const CanvasMapContainer: React.FC<{}> = () => {
     }, [getHexagonAtPoint, draw]);
 
     const handleWheel = useCallback((e: WheelEvent) => {
-        e.preventDefault();
+        return;
+        // e.preventDefault();
         
-        const canvas = canvas_ref.current;
-        const image = image_ref.current;
-        if (!canvas || !image) return;
+        // const canvas = canvas_ref.current;
+        // const image = image_ref.current;
+        // if (!canvas || !image) return;
         
-        const rect = canvas.getBoundingClientRect();
-        const mouseX = e.clientX - rect.left;
-        const mouseY = e.clientY - rect.top;
+        // const rect = canvas.getBoundingClientRect();
+        // const mouseX = e.clientX - rect.left;
+        // const mouseY = e.clientY - rect.top;
         
-        const zoomFactor = e.deltaY > 0 ? 0.9 : 1.1;
-        let newScale = Math.min(Math.max(scale.current * zoomFactor, minScale.current), maxScale.current);
+        // const zoomFactor = e.deltaY > 0 ? 0.9 : 1.1;
+        // let newScale = Math.min(Math.max(scale.current * zoomFactor, minScale.current), maxScale.current);
         
-        const minScaleX = canvas.width / image.width;
-        const minScaleY = canvas.height / image.height;
-        const fitScale = Math.min(minScaleX, minScaleY);
-        newScale = Math.max(newScale, fitScale);
+        // const minScaleX = canvas.width / image.width;
+        // const minScaleY = canvas.height / image.height;
+        // const fitScale = Math.min(minScaleX, minScaleY);
+        // newScale = Math.max(newScale, fitScale);
         
-        if (newScale !== scale.current) {
-            const scaleChange = newScale / scale.current;
-            offsetX.current = mouseX - (mouseX - offsetX.current) * scaleChange;
-            offsetY.current = mouseY - (mouseY - offsetY.current) * scaleChange;
+        // if (newScale !== scale.current) {
+        //     const scaleChange = newScale / scale.current;
+        //     offsetX.current = mouseX - (mouseX - offsetX.current) * scaleChange;
+        //     offsetY.current = mouseY - (mouseY - offsetY.current) * scaleChange;
             
-            scale.current = newScale;
+        //     scale.current = newScale;
             
-            constrainViewBounds();
-            draw();
-        }
+        //     constrainViewBounds();
+        //     draw();
+        // }
     }, [draw, constrainViewBounds]);
 
     const resizeCanvas = useCallback(() => {
@@ -572,13 +572,48 @@ const CanvasMapContainer: React.FC<{}> = () => {
         image_ref.current = image;
         
         image.onload = () => {
+            const { x, y } = player_info?.cities?.[0] || { x: 10, y: 10 };
+            centerHexQ = x;
+            centerHexR = y;
+            
             canvas.width = window.innerWidth;
             canvas.height = window.innerHeight;
             scale.current = 0.5;
-            offsetX.current = (canvas.width - image.width * scale.current) / 2;
-            offsetY.current = (canvas.height - image.height * scale.current) / 2;
             
-            draw();  
+            const radius = gridSize.current;
+            const hexWidth = radius * 2;
+            const hexHeight = radius * Math.sqrt(3);
+            const horizontalSpacing = hexWidth * 0.75;
+            const verticalSpacing = hexHeight;
+            
+            const hexX = centerHexQ * horizontalSpacing + gridOffsetX.current;
+            const hexY = centerHexR * verticalSpacing + ((centerHexQ % 2 === 1) ? hexHeight / 2 : 0) + gridOffsetY.current;
+            
+            // Center view on this hex
+            offsetX.current = canvas.width / 2 - hexX * scale.current;
+            offsetY.current = canvas.height / 2 - hexY * scale.current;
+            
+            // Constrain to image borders
+            const scaledWidth = image.width * scale.current;
+            const scaledHeight = image.height * scale.current;
+            
+            if (scaledWidth <= canvas.width) {
+                offsetX.current = (canvas.width - scaledWidth) / 2;
+            } else {
+                const maxOffsetX = 0;
+                const minOffsetX = canvas.width - scaledWidth;
+                offsetX.current = Math.max(minOffsetX, Math.min(maxOffsetX, offsetX.current));
+            }
+            
+            if (scaledHeight <= canvas.height) {
+                offsetY.current = (canvas.height - scaledHeight) / 2;
+            } else {
+                const maxOffsetY = 0;
+                const minOffsetY = canvas.height - scaledHeight;
+                offsetY.current = Math.max(minOffsetY, Math.min(maxOffsetY, offsetY.current));
+            }
+            
+            draw();
             setLoadingMap(false);
         };
         

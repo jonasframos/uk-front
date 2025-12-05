@@ -5,12 +5,12 @@ import {
     useState
 } from 'react';
 import { useStore } from '../../../store/useStore';
+import BuildingInfoModal from './BuildingInfoModal';
+import useModal from '../../../hooks/useModal';
 
-// Define building polygons (coordinates relative to image dimensions)
 const buildings = [
     {
-        name: "Storage",
-        color: "rgba(0, 255, 0, 0.3)",
+        type: "STORAGE",
         polygon: [
             { x: 0.195, y: 0.445 },
             { x: 0.375, y: 0.31 },
@@ -18,11 +18,11 @@ const buildings = [
             { x: 0.3, y: 0.58 },
             { x: 0.225, y: 0.522 },
             { x: 0.228, y: 0.47 }
-        ]
+        ],
+        label: { x: 0.35, y: 0.4 }
     },
     {
-        name: "Farm",
-        color: "rgba(200, 255, 0, 0.57)",
+        type: "FARM",
         polygon: [
             { x: 0, y: 0 },
             { x: 0, y: 0.72 },
@@ -30,11 +30,11 @@ const buildings = [
             { x: 0.134, y: 0.465 },
             { x: 0.175, y: 0.43 },
             { x: 0.175, y: 0 }
-        ]
+        ],
+        label: { x: 0.1, y: 0.36 }
     },
     {
-        name: "Wall",
-        color: "rgba(255, 21, 0, 0.46)",
+        type: "WALL",
         polygon: [
             { x: 0.41, y: 0.825 },
             { x: 0.13, y: 0.621 },
@@ -46,11 +46,11 @@ const buildings = [
             { x: 0.41, y: 0.598 },
             { x: 0.462, y: 0.64 },
             { x: 0.462, y: 0.79 },
-        ]
+        ],
+        label: { x: 0.4, y: 0.7 }
     },
     {
-        name: "University",
-        color: "rgba(34, 19, 255, 0.46)",
+        type: "UNIVERSITY",
         polygon: [
             { x: 0.5, y: 0.408 },
             { x: 0.385, y: 0.315 },
@@ -60,11 +60,11 @@ const buildings = [
             { x: 0.55, y: 0.05 },
             { x: 0.57, y: 0.16 },
             { x: 0.58, y: 0.35 },
-        ]
+        ],
+        label: { x: 0.5, y: 0.3 }
     },
     {
-        name: "Barracks",
-        color: "rgba(255, 0, 255, 0.46)",
+        name: "BARRACKS",
         polygon: [
             { x: 0.814, y: 0.51 },
             { x: 0.81, y: 0.42 },
@@ -74,22 +74,32 @@ const buildings = [
             { x: 0.462, y: 0.7 },
             { x: 0.59, y: 0.7 },
             { x: 0.625, y: 0.68 },
-        ]
+        ],
+        label: { x: 0.6, y: 0.5 }
     },
     {
-        name: "Lumberjack",
-        color: "rgba(0, 0, 0, 0.46)",
+        type: "LUMBERMILL",
         polygon: [
             { x: 1, y: 0.715 },
             { x: 0.64, y: 0.715 },
             { x: 0.64, y: 0.923 },
             { x: 0.72, y: 1 },
             { x: 1, y: 1 },
-        ]
+        ],
+        label: { x: 0.8, y: 0.8 }
     },
     {
-        name: "Monastry",
-        color: "rgba(107, 1, 93, 0.46)",
+        type: "QUARRY",
+        polygon: [
+            { x: 0, y: 1 },
+            { x: 0, y: 0.925 },
+            { x: 0.26, y: 0.71 },
+            { x: 0.62, y: 1 },
+        ],
+        label: { x: 0.3, y: 0.8 }
+    },
+    {
+        type: "MONASTRY",
         polygon: [
             { x: 1, y: 0.712 },
             { x: 0.895, y: 0.712 },
@@ -97,22 +107,22 @@ const buildings = [
             { x: 0.91, y: 0.545 },
             { x: 0.955, y: 0.52 },
             { x: 1, y: 0.6 },
-        ]
+        ],
+        label: { x: 0.95, y: 0.65 }
     },
     {
-        name: "Blacksmith",
-        color: "rgba(255, 140, 0, 0.46)",
+        type: "BLACKSMITH",
         polygon: [
             { x: 0.885, y: 0.29 },
             { x: 0.87, y: 0.363 },
             { x: 1, y: 0.44 },
             { x: 1, y: 0.32 },
             { x: 0.97, y: 0.28 },
-        ]
+        ],
+        label: { x: 0.95, y: 0.35 }
     },
     {
-        name: "Castle",
-        color: "rgba(0, 255, 255, 0.54)",
+        type: "CASTLE",
         polygon: [
             { x: 1, y: 0 },
             { x: 1, y: 0.32 },
@@ -122,20 +132,60 @@ const buildings = [
             { x: 0.675, y: 0.22 },
             { x: 0.67, y: 0.03 },
             { x: 0.71, y: 0 },
-        ]
+        ],
+        label: { x: 0.85, y: 0.15 }
+    },
+    {
+        type: "HOUSE",
+        polygon: [
+            { x: 0.34, y: 0 },
+            { x: 0.53, y: 0.14 },
+            { x: 0.71, y: 0 },
+        ],
+        label: { x: 0.5, y: 0.05 }
+    },
+    {
+        type: "MARKET",
+        polygon: [
+            { x: 0.385, y: 0.11 },
+            { x: 0.29, y: 0.03 },
+            { x: 0.175, y: 0.13 },
+            { x: 0.175, y: 0.27 },
+            { x: 0.365, y: 0.22 },
+            { x: 0.36, y: 0.19 },
+            { x: 0.36, y: 0.17 },
+        ],
+        label: { x: 0.3, y: 0.15 }
+    },
+    {
+        type: "TABERN",
+        polygon: [
+            { x: 0.445, y: 0.26 },
+            { x: 0.365, y: 0.22 },
+            { x: 0.36, y: 0.19 },
+            { x: 0.36, y: 0.17 },
+            { x: 0.393, y: 0.095 },
+            { x: 0.415, y: 0.125 },
+            { x: 0.415, y: 0.145 },
+            { x: 0.44, y: 0.165 },
+            { x: 0.48, y: 0.135 },
+            { x: 0.5, y: 0.18 },
+            { x: 0.5, y: 0.21 },
+        ],
+        label: { x: 0.42, y: 0.15 }
     }
 ];
 
-const CanvasMapContainer: React.FC<{}> = () => {
+const CanvasCityContainer: React.FC<{}> = () => {
+    const { pushModal } = useModal();
     const setLoadingCity = useStore((state) => state.city.setLoadingCity);
     const is_loading_city = useStore((state) => state.city.is_loading_city);
+    const selected_city = useStore((state) => state.city.selected_city);
     const image_url = 'https://jornada-sat-public.s3.us-east-1.amazonaws.com/test/city-overview.jpg';
-
     const canvas_ref = useRef<HTMLCanvasElement>(null);
     const image_ref = useRef<HTMLImageElement | null>(null);
     const ctx_ref = useRef<CanvasRenderingContext2D | null>(null);
     const imageOffsetRef = useRef({ x: 0, y: 0, width: 0, height: 0 });
-    
     const [hoveredBuilding, setHoveredBuilding] = useState<string | null>(null);
     const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
 
@@ -148,61 +198,83 @@ const CanvasMapContainer: React.FC<{}> = () => {
         
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         
-        // Calculate aspect ratio to fit image within canvas
         const imageAspect = image.width / image.height;
         const canvasAspect = canvas.width / canvas.height;
         
         let drawWidth: number, drawHeight: number, offsetX: number, offsetY: number;
         
         if (imageAspect > canvasAspect) {
-            // Image is wider than canvas
             drawWidth = canvas.width;
             drawHeight = canvas.width / imageAspect;
             offsetX = 0;
             offsetY = (canvas.height - drawHeight) / 2;
         } else {
-            // Image is taller than canvas
             drawHeight = canvas.height;
             drawWidth = canvas.height * imageAspect;
             offsetX = (canvas.width - drawWidth) / 2;
             offsetY = 0;
         }
         
-        // Store image offset and dimensions for coordinate conversion
         imageOffsetRef.current = { x: offsetX, y: offsetY, width: drawWidth, height: drawHeight };
-        
         ctx.drawImage(image, offsetX, offsetY, drawWidth, drawHeight);
-        
-        // Draw building polygons
         buildings.forEach(building => {
-            const isHovered = hoveredBuilding === building.name;
+            const city_building = selected_city?.buildings.find(b => b.type === building.type);
+            if (city_building) {
+                ctx.beginPath();
+                building.polygon.forEach((point, index) => {
+                    const x = offsetX + point.x * drawWidth;
+                    const y = offsetY + point.y * drawHeight;
+                    if (index === 0) {
+                        ctx.moveTo(x, y);
+                    } else {
+                        ctx.lineTo(x, y);
+                    }
+                });
+                ctx.closePath();
+                
+                // Fill polygon with semi-transparent color
+                // if (hoveredBuilding === building.type) {
+                //     ctx.fillStyle = 'rgba(255, 255, 0, 0.3)'; // Yellow on hover
+                // } else {
+                //     ctx.fillStyle = 'rgba(0, 255, 0, 0.2)'; // Light green
+                // }
+                // ctx.fill();
+                
+                // // Draw border
+                // ctx.strokeStyle = 'rgba(255, 255, 255, 0.6)';
+                // ctx.lineWidth = 2;
+                // ctx.stroke();
             
-            ctx.beginPath();
-            building.polygon.forEach((point, index) => {
-                const x = offsetX + point.x * drawWidth;
-                const y = offsetY + point.y * drawHeight;
-                if (index === 0) {
-                    ctx.moveTo(x, y);
-                } else {
-                    ctx.lineTo(x, y);
-                }
-            });
-            ctx.closePath();
-            
-            // Fill with semi-transparent color
-            if (isHovered) {
-                ctx.fillStyle = 'rgba(255, 255, 0, 0.4)';
-            } else {
-                ctx.fillStyle = building.color;
+                const labelX = building.label.x * drawWidth + offsetX;
+                const labelY = building.label.y * drawHeight + offsetY;
+                
+                const text = `${city_building.type} (${city_building.level.toString()})`;
+                
+                ctx.font = 'bold 16px Arial';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                
+                // Measure text to create proper background
+                const textMetrics = ctx.measureText(text);
+                const textWidth = textMetrics.width;
+                const textHeight = 16; // Approximate height
+                const padding = 4;
+                
+                // Draw black background
+                ctx.fillStyle = '#000000';
+                ctx.fillRect(
+                    labelX - textWidth / 2 - padding,
+                    labelY - textHeight / 2 - padding,
+                    textWidth + padding * 2,
+                    textHeight + padding * 2
+                );
+                
+                // Draw white text
+                ctx.fillStyle = '#ffffff';
+                ctx.fillText(text, labelX, labelY);
             }
-            ctx.fill();
-            
-            // Draw border
-            ctx.strokeStyle = isHovered ? '#ffff00' : building.color;
-            ctx.lineWidth = 2;
-            ctx.stroke();
         });
-    }, [hoveredBuilding]);
+    }, [hoveredBuilding, selected_city]);
 
     const isPointInPolygon = useCallback((x: number, y: number, polygon: Array<{x: number, y: number}>) => {
         let inside = false;
@@ -217,6 +289,28 @@ const CanvasMapContainer: React.FC<{}> = () => {
         return inside;
     }, []);
 
+    const handleClick = useCallback((e: MouseEvent) => {
+        const canvas = canvas_ref.current;
+        if (!canvas) return;
+        
+        const rect = canvas.getBoundingClientRect();
+        const mouseX = e.clientX - rect.left;
+        const mouseY = e.clientY - rect.top;
+        
+        const { x: offsetX, y: offsetY, width: drawWidth, height: drawHeight } = imageOffsetRef.current;
+        
+        const relX = (mouseX - offsetX) / drawWidth;
+        const relY = (mouseY - offsetY) / drawHeight;
+        
+        for (const building of buildings) {
+            const city_building = selected_city?.buildings.find(b => b.type === building.type);
+            if (city_building && isPointInPolygon(relX, relY, building.polygon)) {
+                pushModal(<BuildingInfoModal name={city_building?.type ?? ''} level={city_building?.level ?? 1} />);
+                break;
+            }
+        }
+    }, [isPointInPolygon, pushModal]);
+
     const handleMouseMove = useCallback((e: MouseEvent) => {
         const canvas = canvas_ref.current;
         if (!canvas) return;
@@ -229,15 +323,14 @@ const CanvasMapContainer: React.FC<{}> = () => {
         
         const { x: offsetX, y: offsetY, width: drawWidth, height: drawHeight } = imageOffsetRef.current;
         
-        // Convert mouse position to relative image coordinates (0-1)
         const relX = (mouseX - offsetX) / drawWidth;
         const relY = (mouseY - offsetY) / drawHeight;
         
-        // Check which building is hovered
         let foundBuilding: string | null = null;
         for (const building of buildings) {
-            if (isPointInPolygon(relX, relY, building.polygon)) {
-                foundBuilding = building.name;
+            const city_building = selected_city?.buildings.find(b => b.type === building.type);
+            if (city_building && isPointInPolygon(relX, relY, building.polygon)) {
+                foundBuilding = building.name ?? '-';
                 break;
             }
         }
@@ -279,15 +372,24 @@ const CanvasMapContainer: React.FC<{}> = () => {
         image.src = image_url;
 
         canvas.addEventListener('mousemove', handleMouseMove);
+        canvas.addEventListener('click', handleClick);
         window.addEventListener('resize', resizeCanvas);
 
         return () => {
             canvas.removeEventListener('mousemove', handleMouseMove);
+            canvas.removeEventListener('click', handleClick);
             window.removeEventListener('resize', resizeCanvas);
             image_ref.current = null;
             ctx_ref.current = null;
         };
-    }, [image_url, resizeCanvas, setLoadingCity, handleMouseMove]);
+    }, [image_url, resizeCanvas, setLoadingCity, handleMouseMove, handleClick]);
+
+    // Redraw when selected_city data loads
+    useEffect(() => {
+        if (selected_city?.buildings && image_ref.current?.complete) {
+            draw();
+        }
+    }, [selected_city, draw]);
 
     return (
         <div style={{ width: '100%', height: '100%', position: 'relative' }}>
@@ -315,25 +417,8 @@ const CanvasMapContainer: React.FC<{}> = () => {
                     cursor: hoveredBuilding ? 'pointer' : 'default'
                 }}
             />
-            {hoveredBuilding && (
-                <div style={{
-                    position: 'fixed',
-                    left: `${mousePosition.x + 15}px`,
-                    top: `${mousePosition.y + 15}px`,
-                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
-                    color: 'white',
-                    padding: '8px 12px',
-                    borderRadius: '4px',
-                    pointerEvents: 'none',
-                    zIndex: 2000,
-                    fontSize: '14px',
-                    whiteSpace: 'nowrap'
-                }}>
-                    {hoveredBuilding}
-                </div>
-            )}
         </div>
     );
 };
 
-export default CanvasMapContainer;
+export default CanvasCityContainer;
