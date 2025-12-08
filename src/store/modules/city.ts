@@ -7,6 +7,7 @@ import cityService from '../../services/city';
 export const createCitySlice: StateCreator<CityState> = (set, get) => ({
   city: {
     is_loading_city: false,
+    is_sending_building_to_queue: false,
     selected_city: null,
     setLoadingCity(is_loading: boolean) {
       set(
@@ -36,6 +37,27 @@ export const createCitySlice: StateCreator<CityState> = (set, get) => ({
         set(
           produce((state) => {
             state.city.is_loading_city = false;
+          })
+        );
+      }
+    },
+    build(city_id: string, building_type: string, level: number) {
+      set(
+        produce((state) => {
+          state.city.is_sending_building_to_queue = true;
+        })
+      );
+      try {
+        cityService.build(city_id, building_type, level).then(() => {
+          toast.success('Construção iniciada com sucesso!');
+        });
+      } catch (error: any) {
+        toast.error(error.message);
+      }
+      finally {
+        set(
+          produce((state) => {
+            state.city.is_sending_building_to_queue = false;
           })
         );
       }

@@ -11,6 +11,23 @@ const cityService = {
     } catch (error) {
       handleServiceError(error);
     }
+  },
+  build: async (
+    city_id: string,
+    building_type: string,
+    level: number
+  ) => {
+    try {
+      const response = await back_api.post(`/v1/city/${city_id}/build`, {
+        building_type,
+        level
+      });
+      const data = response.data.data;
+
+      return data;
+    } catch (error) {
+      handleServiceError(error);
+    }
   }
 };
 

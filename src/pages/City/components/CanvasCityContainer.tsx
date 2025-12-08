@@ -7,6 +7,8 @@ import {
 import { useStore } from '../../../store/useStore';
 import BuildingInfoModal from './BuildingInfoModal';
 import useModal from '../../../hooks/useModal';
+import BuildingLabel from './BuildingLabel';
+import Countdown from '../../../components/Countdown/Countdown';
 
 const buildings = [
     {
@@ -50,7 +52,7 @@ const buildings = [
         label: { x: 0.4, y: 0.7 }
     },
     {
-        type: "UNIVERSITY",
+        type: "EMBASSY",
         polygon: [
             { x: 0.5, y: 0.408 },
             { x: 0.385, y: 0.315 },
@@ -64,7 +66,7 @@ const buildings = [
         label: { x: 0.5, y: 0.3 }
     },
     {
-        name: "BARRACKS",
+        type: "STRONGHOLD",
         polygon: [
             { x: 0.814, y: 0.51 },
             { x: 0.81, y: 0.42 },
@@ -219,7 +221,8 @@ const CanvasCityContainer: React.FC<{}> = () => {
         ctx.drawImage(image, offsetX, offsetY, drawWidth, drawHeight);
         buildings.forEach(building => {
             const city_building = selected_city?.buildings.find(b => b.type === building.type);
-            if (city_building) {
+            const building_under_construction = selected_city?.builders?.queue?.find(b => b.type === building.type);
+            if ((city_building?.current_level ?? 0) > 0 || building_under_construction) {
                 ctx.beginPath();
                 building.polygon.forEach((point, index) => {
                     const x = offsetX + point.x * drawWidth;
@@ -244,34 +247,6 @@ const CanvasCityContainer: React.FC<{}> = () => {
                 // ctx.strokeStyle = 'rgba(255, 255, 255, 0.6)';
                 // ctx.lineWidth = 2;
                 // ctx.stroke();
-            
-                const labelX = building.label.x * drawWidth + offsetX;
-                const labelY = building.label.y * drawHeight + offsetY;
-                
-                const text = `${city_building.type} (${city_building.level.toString()})`;
-                
-                ctx.font = 'bold 16px Arial';
-                ctx.textAlign = 'center';
-                ctx.textBaseline = 'middle';
-                
-                // Measure text to create proper background
-                const textMetrics = ctx.measureText(text);
-                const textWidth = textMetrics.width;
-                const textHeight = 16; // Approximate height
-                const padding = 4;
-                
-                // Draw black background
-                ctx.fillStyle = '#000000';
-                ctx.fillRect(
-                    labelX - textWidth / 2 - padding,
-                    labelY - textHeight / 2 - padding,
-                    textWidth + padding * 2,
-                    textHeight + padding * 2
-                );
-                
-                // Draw white text
-                ctx.fillStyle = '#ffffff';
-                ctx.fillText(text, labelX, labelY);
             }
         });
     }, [hoveredBuilding, selected_city]);
@@ -304,12 +279,13 @@ const CanvasCityContainer: React.FC<{}> = () => {
         
         for (const building of buildings) {
             const city_building = selected_city?.buildings.find(b => b.type === building.type);
-            if (city_building && isPointInPolygon(relX, relY, building.polygon)) {
-                pushModal(<BuildingInfoModal name={city_building?.type ?? ''} level={city_building?.level ?? 1} />);
+            const building_under_construction = selected_city?.builders?.queue?.find(b => b.type === building.type);
+            if (((city_building?.current_level ?? 0) > 0 || building_under_construction) && isPointInPolygon(relX, relY, building.polygon)) {
+                pushModal(<BuildingInfoModal data={city_building ?? {}} />);
                 break;
             }
         }
-    }, [isPointInPolygon, pushModal]);
+    }, [isPointInPolygon, pushModal, selected_city]);
 
     const handleMouseMove = useCallback((e: MouseEvent) => {
         const canvas = canvas_ref.current;
@@ -329,8 +305,9 @@ const CanvasCityContainer: React.FC<{}> = () => {
         let foundBuilding: string | null = null;
         for (const building of buildings) {
             const city_building = selected_city?.buildings.find(b => b.type === building.type);
-            if (city_building && isPointInPolygon(relX, relY, building.polygon)) {
-                foundBuilding = building.name ?? '-';
+            const building_under_construction = selected_city?.builders?.queue?.find(b => b.type === building.type);
+            if (((city_building?.current_level ?? 0) > 0 || building_under_construction) && isPointInPolygon(relX, relY, building.polygon)) {
+                foundBuilding = building.type ?? '-';
                 break;
             }
         }
@@ -339,7 +316,7 @@ const CanvasCityContainer: React.FC<{}> = () => {
             setHoveredBuilding(foundBuilding);
             draw();
         }
-    }, [hoveredBuilding, isPointInPolygon, draw]);
+    }, [hoveredBuilding, isPointInPolygon, draw, selected_city]);
 
     const resizeCanvas = useCallback(() => {
         const canvas = canvas_ref.current;
@@ -417,6 +394,27 @@ const CanvasCityContainer: React.FC<{}> = () => {
                     cursor: hoveredBuilding ? 'pointer' : 'default'
                 }}
             />
+            {selected_city?.buildings.map(cityBuilding => {
+                const building_def = buildings.find(b => b.type === cityBuilding.type);
+                const building_under_construction = selected_city?.builders?.queue?.find(b => b.type === cityBuilding.type);
+                if (!building_def || ((cityBuilding?.current_level ?? 0) === 0 && !building_under_construction)) return null;
+                
+                const { x: offsetX, y: offsetY, width: drawWidth, height: drawHeight } = imageOffsetRef.current;
+                const labelX = offsetX + building_def.label.x * drawWidth;
+                const labelY = offsetY + building_def.label.y * drawHeight;
+                
+                const queue_item = selected_city?.builders?.queue?.find(b => b.type === building_def.type);
+                
+                return (
+                    <BuildingLabel
+                        key={cityBuilding.type}
+                        building={cityBuilding}
+                        x={labelX}
+                        y={labelY}
+                        countdown={queue_item?.finishes_at ? <Countdown finishes_at={queue_item.finishes_at} key={building_def.type} /> : undefined}
+                    />
+                );
+            })}
         </div>
     );
 };
