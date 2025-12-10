@@ -5,11 +5,16 @@ import { useStore } from "../../../store/useStore";
 const CastleInfoModalContent: React.FC<{}> = () => {
     const selected_city = useStore((state) => state.city.selected_city);
     const build = useStore((state) => state.city.build);
+    const cancelBuild = useStore((state) => state.city.cancelBuild);
     const building_list = useStore((state) => state.city.selected_city?.buildings || []);
     
-    const handle_build = (building_type: string, level: number) => {
+    const handleBuild = (building_type: string, level: number) => {
         if(!selected_city) return;
         build(selected_city.id, building_type, level);
+    }
+    const handleCancelBuild = (queue_id: string) => {
+        if(!selected_city) return;
+        cancelBuild(selected_city.id, queue_id);
     }
 
     return (
@@ -24,6 +29,10 @@ const CastleInfoModalContent: React.FC<{}> = () => {
                                     <span>Construindo {selected_city.builders.queue[i].type} Nível {selected_city.builders.queue[i].level}</span>
                                     <span>Termina em: {new Date(selected_city.builders.queue[i].finishes_at).toLocaleString()}</span>
                                     <span>Tempo Restante: <Countdown finishes_at={selected_city.builders.queue[i].finishes_at} key={i.toString()} /></span>
+                                    <FilledButton
+                                        type="button"
+                                        onClick={() => handleCancelBuild(selected_city.builders?.queue?.[i].id ?? '')}
+                                    >Cancelar</FilledButton>
                                 </div>
                             }
                         </div>
@@ -61,7 +70,7 @@ const CastleInfoModalContent: React.FC<{}> = () => {
                                     <td>
                                         {
                                             can_build ? 
-                                                <FilledButton type='button' onClick={() => handle_build(building.type, building.next_level)}>
+                                                <FilledButton type='button' onClick={() => handleBuild(building.type, building.next_level)}>
                                                     {building.next_level === 1 ? 'Construir' : `Nível ${building.next_level.toString()}`}
                                                 </FilledButton> 
                                             : <span>{cant_build_message}</span>

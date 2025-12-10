@@ -8,6 +8,7 @@ export const createCitySlice: StateCreator<CityState> = (set, get) => ({
   city: {
     is_loading_city: false,
     is_sending_building_to_queue: false,
+    is_sending_recruit_to_queue: false,
     selected_city: null,
     setLoadingCity(is_loading: boolean) {
       set(
@@ -58,6 +59,69 @@ export const createCitySlice: StateCreator<CityState> = (set, get) => ({
         set(
           produce((state) => {
             state.city.is_sending_building_to_queue = false;
+          })
+        );
+      }
+    },
+    cancelBuild(city_id: string, queue_id: string) {
+      set(
+        produce((state) => {
+          state.city.is_sending_building_to_queue = true;
+        })
+      );
+      try {
+        cityService.cancelBuild(city_id, queue_id).then(() => {
+          toast.success('Construção interrompida com sucesso!');
+        });
+      } catch (error: any) {
+        toast.error(error.message);
+      }
+      finally {
+        set(
+          produce((state) => {
+            state.city.is_sending_building_to_queue = false;
+          })
+        );
+      }
+    },
+    recruit(city_id: string, type: string, amount: number) {
+      set(
+        produce((state) => {
+          state.city.is_sending_recruit_to_queue = true;
+        })
+      );
+      try {
+        cityService.recruit(city_id, type, amount).then(() => {
+          toast.success('Recrutamento iniciado com sucesso!');
+        });
+      } catch (error: any) {
+        toast.error(error.message);
+      }
+      finally {
+        set(
+          produce((state) => {
+            state.city.is_sending_recruit_to_queue = false;
+          })
+        );
+      }
+    },
+    cancelRecruit(city_id: string, queue_id: string) {
+      set(
+        produce((state) => {
+          state.city.is_sending_recruit_to_queue = true;
+        })
+      );
+      try {
+        cityService.cancelRecruit(city_id, queue_id).then(() => {
+          toast.success('Recrutamento interrompido com sucesso!');
+        });
+      } catch (error: any) {
+        toast.error(error.message);
+      }
+      finally {
+        set(
+          produce((state) => {
+            state.city.is_sending_recruit_to_queue = false;
           })
         );
       }

@@ -28,6 +28,53 @@ const cityService = {
     } catch (error) {
       handleServiceError(error);
     }
+  },
+  cancelBuild: async (
+    city_id: string,
+    queue_id: string,
+  ) => {
+    try {
+      const response = await back_api.post(`/v1/city/${city_id}/build/cancel`, {
+        queue_id
+      });
+      const data = response.data.data;
+
+      return data;
+    } catch (error) {
+      handleServiceError(error);
+    }
+  },
+  recruit: async (
+    city_id: string,
+    type: string,
+    amount: number
+  ) => {
+    try {
+      const response = await back_api.post(`/v1/city/${city_id}/recruit`, {
+        type,
+        amount
+      });
+      const data = response.data.data;
+
+      return data;
+    } catch (error) {
+      handleServiceError(error);
+    }
+  },
+  cancelRecruit: async (
+    city_id: string,
+    queue_id: string,
+  ) => {
+    try {
+      const response = await back_api.post(`/v1/city/${city_id}/recruit/cancel`, {
+        queue_id
+      });
+      const data = response.data.data;
+
+      return data;
+    } catch (error) {
+      handleServiceError(error);
+    }
   }
 };
 

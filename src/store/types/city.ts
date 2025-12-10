@@ -16,6 +16,7 @@ export interface City {
         type: string;
         level: number;
         finishes_at: string;
+        id: string;
       }[]
   };
   population?: {
@@ -38,6 +39,17 @@ export interface City {
       gold?: number;
   };
   defense?: number;
+  units: CityUnit[];
+  unit_slots: {
+      max: number;
+      free: number;
+      queue: [{
+        type: string;
+        amount: number;
+        finishes_at: string;
+        id: string;
+      }]
+  }
 }
 
 export interface CityBuilding {
@@ -61,13 +73,54 @@ export interface CityBuilding {
   type: string;
 }
 
+export interface CityUnit {
+  type: string;
+  amount: number;
+  can_recruit: {
+    resources: boolean;
+    slots: boolean;
+    population: boolean;
+  }
+  cost: {
+    food: number;
+    gold: number;
+    wood: number;
+    stone: number;
+  }
+  recruit_time: number;
+  stats: UnitStats;
+  in: number;
+  out: number;
+  support: number;
+}
+
+export interface UnitStats {
+  attack: {
+    pierce: number;
+    strike: number;
+    charge: number;
+  };
+  defense: {
+    pierce: number;
+    strike: number;
+    charge: number;
+  };
+  speed: number;
+  health: number;
+  armor: number;
+}
+
 export interface CityState {
   city: {
     is_loading_city: boolean;
     is_sending_building_to_queue: boolean;
+    is_sending_recruit_to_queue: boolean;
     selected_city: City | null;
     setLoadingCity(is_loading: boolean): void;
     getCity(id: string): void;
     build(city_id: string, building_type: string, level: number): void;
+    cancelBuild(city_id: string, id: string): void;
+    recruit(city_id: string, type: string, amount: number): void;
+    cancelRecruit(city_id: string, id: string): void;
   };
 }

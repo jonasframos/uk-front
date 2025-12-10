@@ -13,7 +13,8 @@ const CityGeneral: React.FC<{}> = () => {
       population,
       defense,
       level,
-      experience
+      experience,
+      unit_slots
     } = selected_city || {};
 
     const production_per_second = {
@@ -94,6 +95,9 @@ const CityGeneral: React.FC<{}> = () => {
           <hr />
           <div className='flex flex-col'>
             <span>Construtores: {builders?.free}/{builders?.max}</span>
+          </div>
+          <div className='flex flex-col'>
+            <span>Recrutamento: {unit_slots?.free}/{unit_slots?.max}</span>
           </div>
           <hr />
           <div className='flex flex-col'>
