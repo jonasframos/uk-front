@@ -12,36 +12,17 @@ module.exports = {
       gray_2: "#7B809A",
       gray_3: "#4F4F52",
       black: "#191919",
-      "dark-blue": "#344767",
       white: "#fff",
-      green: "#4CAF50",
-      blue: "#2054e3",
-      purple: "#7f19ff",
-      "light-purple": "#e7d4ff",
-      "light-blue": "#d4ecff",
-      "light-green": "#dbefdc",
-      "light-orange": "#FFE2D2",
-      "orange": "#FB8C00",
-      red: "#DA1E27",
-      "light-red": "#F6CCCC",
-      "statistics_color_1": "#A2A2A2",
-      "statistics_color_2": "#E98D7F",
-      "statistics_color_3": "#C26388",
-      "statistics_color_4": "#8B81C3",
-      "statistics_color_5": "#75A6C2",
-      "statistics_color_6": "#5C7995",
-      "statistics_color_7": "#D4B483",
-      "statistics_color_8": "#F2C9A7",
-      "statistics_color_9": "#B48EAE",
-      "statistics_color_10": "#9FB9D1",
-      "statistics_color_11": "#4E6E81",
-      "statistics_color_12": "#709F6E",
-      "statistics_color_13": "#E1A5B9",
-      "statistics_color_14": "#CFCFCF",
-      "statistics_color_15": "#3F4E4F",
-      "statistics_color_16": "#FFE4C4"
+      rust: "#874f0e",
+      phoenix_red: "#d97055",
+      wild_west: "#865952",
+      burlywood: "#DEB887",
+      old_paper: "#E0C9A6",
+      honey_gold: "#DDB57C"
     },
     fontSize: {
+      xxs: "0.5625rem", // 9px
+      xs: "0.6525rem", // 10.44px
       sm: "0.75rem", // 12px
       base: "0.875rem", // 14px
       lg: "1rem", // 16px

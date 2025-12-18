@@ -5,10 +5,11 @@ import {
     useState
 } from 'react';
 import { useStore } from '../../../store/useStore';
+import Toolbar from './Toolbar';
+import { CityImage } from '../../../assets/images';
 import TileInfo from './TileInfo';
-import PlayerInfo from './PlayerInfo';
-import MapControls from './MapControls';
-import TileInfoSelected from './TileInfoSelected';
+import TierText from '../../../components/Text/TierText';
+import SelectedTileInfo from './SelectedTileInfo';
 
 
 const CanvasMapContainer: React.FC<{}> = () => {
@@ -18,6 +19,7 @@ const CanvasMapContainer: React.FC<{}> = () => {
     const player_info = useStore((state) => state.player.current_player);
     const show_grid = useStore((state) => state.map.show_grid);
     const show_minimap = useStore((state) => state.map.show_minimap);
+    const show_legend = useStore((state) => state.map.show_legend);
     const image_url = selected_map ? selected_map.image : '';
     const canvas_ref = useRef<HTMLCanvasElement>(null);
     const minimap_canvas_ref = useRef<HTMLCanvasElement>(null);
@@ -29,9 +31,7 @@ const CanvasMapContainer: React.FC<{}> = () => {
     const cityImages = useRef<Map<string, HTMLImageElement>>(new Map());
     const offsetX = useRef(0);
     const offsetY = useRef(0);
-    const scale = useRef(0.5);
-    const minScale = useRef(0.5);
-    const maxScale = useRef(1);
+    const scale = useRef(0.7);
     let centerHexQ = 10;
     let centerHexR = 10;
     const isDragging = useRef(false);
@@ -46,16 +46,21 @@ const CanvasMapContainer: React.FC<{}> = () => {
     const hexagons = useRef<Array<any>>([]);
     const gridCacheValid = useRef(false);
     const showGridRef = useRef(show_grid);
+    const showLegendRef = useRef(show_legend);
     const hoveredHex = useRef<any>(null);
     const selectedHexagons = useRef<Map<string, any>>(new Map());
-    const [hoveredHexagon, setHoveredHexagon] = useState<any>(null);
+    const rafIdRef = useRef<number | null>(null);
+    const hoverTimeoutRef = useRef<NodeJS.Timeout | null>(null);
     const [selectedHexagon, setSelectedHexagon] = useState<any>(null);
+    const [hoveredHexagon, setHoveredHexagon] = useState<any>(null);
     const [mousePosition, setMousePosition] = useState<{x: number, y: number}>({ x: 0, y: 0 });
+    const tierLabelsContainerRef = useRef<HTMLDivElement>(null);
+    const [tierHexagons, setTierHexagons] = useState<Array<any>>([]);
 
     const drawCityOnHex = useCallback((ctx: CanvasRenderingContext2D, hexData: any, forceRedraw?: () => void) => {
         if (!hexData.tile_info?.owned_by?.city) return;
         
-        const cityImageUrl = 'https://jornada-sat-public.s3.us-east-1.amazonaws.com/test/city.png';
+        const cityImageUrl = CityImage;
         const cacheKey = `city_${hexData.q}_${hexData.r}`;
         
         let cityImage = cityImages.current.get(cacheKey);
@@ -72,7 +77,7 @@ const CanvasMapContainer: React.FC<{}> = () => {
             cityImage.src = cityImageUrl;
             cityImages.current.set(cacheKey, cityImage);
         } else if (cityImage.complete) {
-            const imageSize = hexData.radius * 1.5;
+            const imageSize = hexData.radius * 1.6;
             ctx.drawImage(
                 cityImage,
                 hexData.centerX - imageSize / 2,
@@ -128,13 +133,13 @@ const CanvasMapContainer: React.FC<{}> = () => {
         ctx.closePath();
         
         if (isSelected) {
-            ctx.globalAlpha = 0.4;
-            ctx.fillStyle = '#ffff04ff';
+            ctx.globalAlpha = 0.3;
+            ctx.fillStyle = '#3a6df9ff';
             ctx.fill();
             
-            ctx.globalAlpha = 1.0;
-            ctx.strokeStyle = '#ffff04ff';
-            ctx.lineWidth = 3 / scale.current;
+            ctx.globalAlpha = 0.3;
+            ctx.strokeStyle = '#3a6df9ff';
+            ctx.lineWidth = 1 / scale.current;
             ctx.stroke();
             
             ctx.fillStyle = '#000';
@@ -146,9 +151,9 @@ const CanvasMapContainer: React.FC<{}> = () => {
             ctx.fillStyle = '#ffffffc1';
             ctx.fill();
             
-            ctx.globalAlpha = 1.0;
+            ctx.globalAlpha = 0.3;
             ctx.strokeStyle = '#ffffffff';
-            ctx.lineWidth = 2 / scale.current;
+            ctx.lineWidth = 1 / scale.current;
             ctx.stroke();
         }
     }, []);
@@ -220,11 +225,15 @@ const CanvasMapContainer: React.FC<{}> = () => {
                             terrain: tile_info?.terrain || null,
                             is_buildable: tile_info?.is_buildable || false,
                             owned_by: tile_info?.owned_by || null,
+                            tier: tile_info?.tier || null,
+                            effects: tile_info?.effects || [],
                         }
                     };
                     hexagons.current.push(hexData);
-                    drawBasicHexagon(visibleCtx, x, y, radius);
-                    drawBasicHexagon(invisibleCtx, x, y, radius);
+                    if(tile_info?.is_buildable) {
+                        drawBasicHexagon(visibleCtx, x, y, radius);
+                        drawBasicHexagon(invisibleCtx, x, y, radius);
+                    }
                 } 
                 rowIndex++;
             }
@@ -234,6 +243,10 @@ const CanvasMapContainer: React.FC<{}> = () => {
         visibleCtx.globalAlpha = 1.0;
         invisibleCtx.globalAlpha = 1.0;
         gridCacheValid.current = true;
+        
+        // Update tier hexagons list for legend rendering
+        const hexesWithTier = hexagons.current.filter(hex => hex.tile_info?.tier);
+        setTierHexagons(hexesWithTier);
     }, [drawBasicHexagon, selected_map]);
 
     const getHexagonAtPoint = useCallback((canvasX: number, canvasY: number) => {
@@ -322,6 +335,7 @@ const CanvasMapContainer: React.FC<{}> = () => {
     }, [show_minimap]);
 
     const draw = useCallback(() => {
+        scale.current = 0.6;
         const canvas = canvas_ref.current;
         const ctx = ctx_ref.current;
         const image = image_ref.current;
@@ -329,7 +343,6 @@ const CanvasMapContainer: React.FC<{}> = () => {
         
         if (!canvas || !ctx || !image) return;
         
-        // Render grid to cache if needed
         if (renderGrid.current && !gridCacheValid.current) {
             renderGridToCache(image);
         }
@@ -339,28 +352,23 @@ const CanvasMapContainer: React.FC<{}> = () => {
         ctx.translate(offsetX.current, offsetY.current);
         ctx.scale(scale.current, scale.current);
         
-        // Draw image
         ctx.drawImage(image, 0, 0);
         
-        // Draw cached grid (visible or invisible based on showGridRef)
         if (renderGrid.current && gridCache && gridCacheValid.current) {
             ctx.drawImage(gridCache, 0, 0);
         }
         
-        // Draw cities on hexagons that have them
         const hexesWithCities = hexagons.current.filter(hex => hex.tile_info?.owned_by?.city);
         hexesWithCities.forEach((hex) => {
             drawCityOnHex(ctx, hex, draw);
         });
         
-        // Draw hover and selected hexagons on top
         if (renderGrid.current) {
             if (hoveredHex.current) {
                 const isSelected = selectedHexagons.current.has(`${hoveredHex.current.q},${hoveredHex.current.r}`);
                 drawHoverSelectHexagon(ctx, hoveredHex.current, true, isSelected);
             }
             
-            // Draw selected hexagons (that are not hovered)
             selectedHexagons.current.forEach((hex) => {
                 if (hex && (!hoveredHex.current || hoveredHex.current.q !== hex.q || hoveredHex.current.r !== hex.r)) {
                     drawHoverSelectHexagon(ctx, hex, false, true);
@@ -370,9 +378,18 @@ const CanvasMapContainer: React.FC<{}> = () => {
     
         ctx.restore();
         
+        // Update tier labels container transform to match canvas (use RAF for better performance)
+        if (tierLabelsContainerRef.current && showLegendRef.current) {
+            const container = tierLabelsContainerRef.current;
+            // Use transform directly without triggering layout
+            container.style.transform = `translate(${offsetX.current}px, ${offsetY.current}px) scale(${scale.current})`;
+            container.style.willChange = 'transform';
+        }
+        
         // Update minimap
         drawMinimap();
-    }, [renderGridToCache, drawHoverSelectHexagon, drawMinimap]);
+        setLoadingMap(false);
+    }, [renderGridToCache, drawHoverSelectHexagon, drawMinimap, setLoadingMap]);
 
     const constrainViewBounds = useCallback(() => {
         const canvas = canvas_ref.current;
@@ -436,13 +453,35 @@ const CanvasMapContainer: React.FC<{}> = () => {
             lastMouseX.current = mouseX;
             lastMouseY.current = mouseY;
             
-            draw();
+            // Use RAF to throttle draw calls during drag
+            if (!rafIdRef.current) {
+                rafIdRef.current = requestAnimationFrame(() => {
+                    draw();
+                    rafIdRef.current = null;
+                });
+            }
         } else if (renderGrid.current) {
             // Update hover state
             const hex = getHexagonAtPoint(mouseX, mouseY);
             if (hex !== hoveredHex.current) {
+                // Clear any existing timeout
+                if (hoverTimeoutRef.current) {
+                    clearTimeout(hoverTimeoutRef.current);
+                    hoverTimeoutRef.current = null;
+                }
+                
                 hoveredHex.current = hex;
-                setHoveredHexagon(hex);
+                
+                // Set hoveredHexagon after 200ms delay
+                if (hex) {
+                    hoverTimeoutRef.current = setTimeout(() => {
+                        setHoveredHexagon(hex);
+                        hoverTimeoutRef.current = null;
+                    }, 50);
+                } else {
+                    setHoveredHexagon(null);
+                }
+                
                 draw();
             }
             setMousePosition({x: e.clientX, y: e.clientY});
@@ -466,11 +505,11 @@ const CanvasMapContainer: React.FC<{}> = () => {
                     selectedHexagons.current.delete(coordKey);
                     setSelectedHexagon(null);
                 } else {
-                    if(hex.tile_info?.owned_by?.city) {
-                        selectedHexagons.current.clear();
-                        selectedHexagons.current.set(coordKey, hex);
-                        setSelectedHexagon(hex);
-                    }
+                    selectedHexagons.current.clear();
+                    selectedHexagons.current.set(coordKey, hex);
+                    setSelectedHexagon(hex);
+                    // if(hex.tile_info?.owned_by?.city) {
+                    // }
                 }
                 draw();
             }
@@ -517,8 +556,11 @@ const CanvasMapContainer: React.FC<{}> = () => {
         const image = image_ref.current;
         if (!canvas || !image) return;
 
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
+        const parent = canvas.parentElement;
+        if (!parent) return;
+
+        canvas.width = parent.clientWidth;
+        canvas.height = parent.clientHeight;
 
         offsetX.current = (canvas.width - image.width * scale.current) / 2;
         offsetY.current = (canvas.height - image.height * scale.current) / 2;
@@ -528,14 +570,17 @@ const CanvasMapContainer: React.FC<{}> = () => {
     }, [draw, constrainViewBounds]);
 
     useEffect(() => {
-        // Update showGridRef and redraw when show_grid changes
         showGridRef.current = show_grid;
         draw();
     }, [show_grid, draw]);
 
     useEffect(() => {
-        // Initialize or update minimap canvas when show_minimap changes
-        if (show_minimap) {
+        showLegendRef.current = show_legend;
+        draw();
+    }, [show_legend, draw]);
+
+    useEffect(() => {
+        if (!is_loading_map && show_minimap) {
             const minimapCanvas = minimap_canvas_ref.current;
             if (minimapCanvas) {
                 const minimapCtx = minimapCanvas.getContext('2d');
@@ -550,34 +595,39 @@ const CanvasMapContainer: React.FC<{}> = () => {
     }, [show_minimap, draw]);
 
     useEffect(() => {
-        const canvas = canvas_ref.current;
-        if (!canvas) return;
-        
-        const ctx = canvas.getContext('2d');
-        if (!ctx) return;
-        ctx_ref.current = ctx;
-        
-        // Initialize minimap canvas
-        if (show_minimap) {
+        if (!is_loading_map && show_minimap) {
             const minimapCanvas = minimap_canvas_ref.current;
             if (minimapCanvas) {
                 const minimapCtx = minimapCanvas.getContext('2d');
                 if (minimapCtx) {
                     minimap_ctx_ref.current = minimapCtx;
+                    draw();
                 }
             }
         }
+    }, [is_loading_map, show_minimap, draw]);
+
+    useEffect(() => {
+        const canvas = canvas_ref.current;
+        if (!canvas) return;
+        if (!selected_map || !image_url || !player_info) return;        
+        const ctx = canvas.getContext('2d');
+        if (!ctx) return;
+        ctx_ref.current = ctx;
         
         const image = new Image();
         image_ref.current = image;
         
         image.onload = () => {
+            const parent = canvas.parentElement;
+            if (!parent) return;
+            
             const { x, y } = player_info?.cities?.[0] || { x: 10, y: 10 };
             centerHexQ = x;
             centerHexR = y;
             
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
+            canvas.width = parent.clientWidth;
+            canvas.height = parent.clientHeight;
             scale.current = 0.5;
             
             const radius = gridSize.current;
@@ -614,11 +664,14 @@ const CanvasMapContainer: React.FC<{}> = () => {
             }
             
             draw();
-            setLoadingMap(false);
+            
+            setTimeout(() => {
+                setLoadingMap(false);
+            }, 100);
         };
         
         image.src = image_url;
-
+        
         canvas.addEventListener('mousedown', handleMouseDown);
         canvas.addEventListener('mousemove', handleMouseMove);
         canvas.addEventListener('mouseup', handleMouseUp);
@@ -636,10 +689,10 @@ const CanvasMapContainer: React.FC<{}> = () => {
             image_ref.current = null;
             ctx_ref.current = null;
         };
-    }, [image_url, draw, handleMouseDown, handleMouseMove, handleMouseUp, handleWheel, resizeCanvas, setLoadingMap, show_minimap]);
+    }, [selected_map, image_url, draw, handleMouseDown, handleMouseMove, handleMouseUp, handleWheel, resizeCanvas, setLoadingMap, show_minimap, player_info]);
 
     return (
-        <div>
+        <div style={{ width: '100%', height: '100%', position: 'relative' }}>
             {is_loading_map && (
                 <div style={{
                     position: 'fixed',
@@ -655,97 +708,79 @@ const CanvasMapContainer: React.FC<{}> = () => {
                     Loading Map...
                 </div>
             )}
-            <div>
-                <div style={{ 
-                    position: 'fixed',
-                    top: 0,
-                    left: 0,
-                    width: '100vw', 
-                    height: '100vh', 
-                    overflow: 'hidden',
-                    margin: 0,
-                    padding: 0
-                }}>
-                    <canvas 
-                        ref={canvas_ref} 
-                        style={{ 
-                            display: 'block', 
-                            cursor: isDragging.current ? 'grabbing' : 'grab',
-                            width: '100%',
-                            height: '100%'
-                        }}
-                    />
-                </div>
-                {show_minimap && (
-                    <div style={{
+            <div style={{ 
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                width: '100%', 
+                height: '100%', 
+                overflow: 'hidden',
+                margin: 0,
+                padding: 0
+            }}>
+                <canvas 
+                    ref={canvas_ref} 
+                    style={{ 
+                        display: 'block', 
+                        cursor: isDragging.current ? 'grabbing' : 'grab',
+                        width: '100%',
+                        height: '100%'
+                    }}
+                />
+            </div>
+            {!is_loading_map && show_legend && (
+                <div
+                    ref={tierLabelsContainerRef}
+                    style={{
                         position: 'absolute',
-                        bottom: '30px',
-                        right: '30px',
-                        border: '2px solid #333',
-                        borderRadius: '4px',
-                        backgroundColor: 'rgba(0, 0, 0, 0.7)',
-                        boxShadow: '0 4px 6px rgba(0, 0, 0, 0.3)',
-                        pointerEvents: 'auto',
-                        zIndex: 2000
-                    }}>
-                        <canvas 
-                            ref={minimap_canvas_ref}
-                            width={300}
-                            height={300}
-                            style={{ 
-                                display: 'block',
-                                cursor: 'pointer'
-                            }}
-                        />
-                    </div>
-                )}
-                {hoveredHexagon && (
-                    <div style={{
-                        position: 'fixed',
-                        left: `${Math.min(mousePosition.x + 20, window.innerWidth - 350)}px`,
-                        top: `${Math.min(mousePosition.y + 20, window.innerHeight - 170)}px`,
+                        top: 0,
+                        left: 0,
                         pointerEvents: 'none',
-                        zIndex: 2000,
-                        width: '250px'
-                    }}>
-                        <TileInfo data={hoveredHexagon} />
-                    </div>
-                )}
-                {selectedHexagon && (
-                    <div style={{
-                        position: 'fixed',
-                        bottom: '30px',
-                        left: '30px',
-                        pointerEvents: 'auto',
-                        zIndex: 2000,
-                        width: '250px'
-                    }}>
-                        <TileInfoSelected data={selectedHexagon} />
-                    </div>
-                )}
-                {player_info && (
-                    <div style={{
-                        position: 'fixed',
-                        top: '30px',
-                        left: '30px',
-                        pointerEvents: 'auto',
-                        zIndex: 2000,
-                        width: '250px'
-                    }}>
-                        <PlayerInfo data={player_info} />
-                    </div>
-                )}
-                 <div style={{
+                        transformOrigin: '0 0',
+                        zIndex: 100
+                    }}
+                >
+                    {tierHexagons.map((hex) => (
+                        <div
+                            key={`tier-${hex.q}-${hex.r}`}
+                            style={{
+                                position: 'absolute',
+                                left: `${hex.centerX}px`,
+                                top: `${hex.centerY}px`,
+                                transform: 'translate(-50%, -50%)',
+                                pointerEvents: 'none'
+                            }}
+                        >
+                            <TierText tier={hex.tile_info.tier} className='text-[23px] py-1 px-3' />
+                        </div>
+                    ))}
+                </div>
+            )}
+            {!is_loading_map && <Toolbar canvas_ref={minimap_canvas_ref} />}
+            {!is_loading_map && hoveredHexagon && !selectedHexagon &&(
+                <div style={{
                     position: 'fixed',
-                    top: '30px',
-                    left: '310px',
+                    left: `${Math.min(mousePosition.x + 25, window.innerWidth - 370)}px`,
+                    top: `${Math.min(mousePosition.y + 25, window.innerHeight - 200)}px`,
+                    pointerEvents: 'none',
+                    zIndex: 2000,
+                    width: '280px'
+                }}>
+                    <TileInfo data={hoveredHexagon} />
+                </div>
+            )}
+            {!is_loading_map && selectedHexagon && (
+                <div style={{
+                    position: 'fixed',
+                    bottom: '80px',
+                    left: '30px',
                     pointerEvents: 'auto',
                     zIndex: 2000,
                     width: '250px'
                 }}>
-                    <MapControls show_grid={show_grid} show_minimap={show_minimap} />
+                    <SelectedTileInfo data={selectedHexagon} />
                 </div>
-            </div>
+            )}
         </div>
     );
 };

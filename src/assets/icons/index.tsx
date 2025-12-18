@@ -1,1 +1,12 @@
 export { default as CloseIcon } from "./CloseIcon";
+export { default as MapIcon } from "./map.png";
+export { default as RankingIcon } from "./ranking.png";
+export { default as GridIcon } from "./grid.png";
+export { default as ProfileIcon } from "./profile.png";
+export { default as CityIcon } from "./city.png";
+export { default as CavalryIcon } from "./cavalry.png";
+export { default as InfantryIcon } from "./infantry.png";
+export { default as StoneIcon } from "./stone.png";
+export { default as WallIcon } from "./wall.png";
+export { default as ReportIcon } from './report.png';
+export { default as AttackIcon } from './attack.png';

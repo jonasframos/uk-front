@@ -10,45 +10,51 @@ export interface City {
   level: number;
   points: number;
   builders?: {
-      max?: number;
-      free?: number;
-      queue?: {
-        type: string;
-        level: number;
-        finishes_at: string;
-        id: string;
-      }[]
+    max?: number;
+    free?: number;
+    queue?: {
+      type: string;
+      level: number;
+      finishes_at: string;
+      id: string;
+    }[]
   };
   population?: {
-      max?: number;
-      current?: number
+    max?: number;
+    current?: number
   };
   storage?: {
-      max?: number;
-      current?: {
-          gold?: number;
-          food?: number;
-          wood?: number;
-          stone?: number
-      }
-  };
-  production?: {
+    max?: number;
+    current?: {
+      gold?: number;
       food?: number;
       wood?: number;
-      stone?: number;
-      gold?: number;
+      stone?: number
+    },
+    full_at?: {
+      gold?: string;
+      food?: string;
+      wood?: string;
+      stone?: string
+    }
+  };
+  production?: {
+    food?: number;
+    wood?: number;
+    stone?: number;
+    gold?: number;
   };
   defense?: number;
   units: CityUnit[];
   unit_slots: {
-      max: number;
-      free: number;
-      queue: [{
-        type: string;
-        amount: number;
-        finishes_at: string;
-        id: string;
-      }]
+    max: number;
+    free: number;
+    queue: [{
+      type: string;
+      amount: number;
+      finishes_at: string;
+      id: string;
+    }]
   }
 }
 
@@ -74,6 +80,7 @@ export interface CityBuilding {
 }
 
 export interface CityUnit {
+  category: string;
   type: string;
   amount: number;
   can_recruit: {
@@ -99,6 +106,7 @@ export interface UnitStats {
     pierce: number;
     strike: number;
     charge: number;
+    building: number;
   };
   defense: {
     pierce: number;

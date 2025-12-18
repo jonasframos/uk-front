@@ -4,6 +4,12 @@ import CastleInfoModalContent from '../../Buildings/components/CastleInfoModal';
 import StrongholdInfoModalContent from '../../Buildings/components/StrongholdInfoModal';
 import { useStore } from "../../../store/useStore";
 import Countdown from '../../../components/Countdown/Countdown';
+import StorageInfoModalContent from '../../Buildings/components/StorageModal';
+import LumberMillInfoModalContent from '../../Buildings/components/LumberMillInfoModal';
+import FarmInfoModalContent from '../../Buildings/components/FarmInfoModal';
+import QuarryInfoModalContent from '../../Buildings/components/QuarryInfoModal';
+import BlacksmithInfoModalContent from '../../Buildings/components/BlacksmithInfoModal';
+import MarketInfoModalContent from '../../Buildings/components/MarketInfoModal';
 
 export interface BuildingInfoModalProps {
   data: {
@@ -31,13 +37,9 @@ export interface BuildingInfoModalProps {
 const BuildingInfoModal: React.FC<BuildingInfoModalProps> = ({ data }) => {
   const {
     type,
-    maxed_out,
-    current_level,
     next_level,
-    build_time,
-    build_cost,
     can_build,
-    can_build_at = null,
+    current_level = 0
   } = data;
 
   let content;
@@ -47,6 +49,24 @@ const BuildingInfoModal: React.FC<BuildingInfoModalProps> = ({ data }) => {
       break;
     case 'STRONGHOLD':
       content = <StrongholdInfoModalContent />;
+      break;
+    case 'BLACKSMITH':
+      content = <BlacksmithInfoModalContent />;
+      break;
+    case 'STORAGE':
+      content = <StorageInfoModalContent />;
+      break;
+    case 'LUMBERMILL':
+      content = <LumberMillInfoModalContent />;
+      break;
+    case 'FARM':
+      content = <FarmInfoModalContent />;
+      break;
+    case 'QUARRY':
+      content = <QuarryInfoModalContent />;
+      break;
+    case 'MARKET':
+      content = <MarketInfoModalContent />;
       break;
     default:
       content = null;
@@ -90,9 +110,11 @@ const BuildingInfoModal: React.FC<BuildingInfoModalProps> = ({ data }) => {
                   <span>Termina em: {new Date(finishes_at).toLocaleString()}</span>
                   <span>Tempo Restante: <Countdown key={finishes_at.toString()} finishes_at={finishes_at.toString()} /></span>
                   <FilledButton
-                      type="button"
-                      onClick={() => handleCancelBuild(selected_city?.builders?.queue?.find(q => q.type === type && q.level === next_level)?.id ?? '')}
-                  >Cancelar</FilledButton>
+                    type="button"
+                    onClick={() => handleCancelBuild(selected_city?.builders?.queue?.find(q => q.type === type && q.level === next_level)?.id ?? '')}
+                  >
+                    Cancelar
+                  </FilledButton>
               </div>
             }
             {
@@ -102,9 +124,12 @@ const BuildingInfoModal: React.FC<BuildingInfoModalProps> = ({ data }) => {
                     </FilledButton> 
                 : <span>{cant_build_message}</span>
             }
-            <div className='flex justify-end mt-1'>
-              {content}
-            </div>
+            {
+              current_level >= 1 &&
+              <div className='flex justify-end mt-1'>
+                {content}
+              </div>
+            }
         </div>
     </Modal>
   );

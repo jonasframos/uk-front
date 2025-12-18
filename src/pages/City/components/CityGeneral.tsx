@@ -14,7 +14,8 @@ const CityGeneral: React.FC<{}> = () => {
       defense,
       level,
       experience,
-      unit_slots
+      unit_slots,
+      units
     } = selected_city || {};
 
     const production_per_second = {
@@ -101,6 +102,11 @@ const CityGeneral: React.FC<{}> = () => {
           </div>
           <hr />
           <div className='flex flex-col'>
+            <span>Tropas</span>
+            {
+              units?.map(unit => ((unit.in ?? 0) + (unit.out ?? 0)) > 0 && <span key={unit.type}>{unit.type}: {(unit.in ?? 0) + (unit.out ?? 0)}</span>)
+            }
+
             <span>Bônus Defensivo: {defense}%</span>
           </div>
         </div>

@@ -5,7 +5,7 @@ import OutlinedInput from "../../../components/Inputs/OutlinedInput";
 import { useStore } from "../../../store/useStore";
 import * as Yup from "yup";
 
-const StrongholdInfoModalContent: React.FC<{}> = () => {
+const BlacksmithInfoModalContent: React.FC<{}> = () => {
     const selected_city = useStore((state) => state.city.selected_city);
     const unit_list = useStore((state) => state.city.selected_city?.units || []);
     const recruit = useStore((state) => state.city.recruit);
@@ -14,14 +14,8 @@ const StrongholdInfoModalContent: React.FC<{}> = () => {
         if(!selected_city) return;
         cancelRecruit(selected_city.id, id);
     }
-    const building_unit_categories = [
-        'RANGED_INFANTRY',
-        'LIGHT_INFANTRY',
-        'HEAVY_INFANTRY',
-        'RANGED_CAVALRY',
-        'LIGHT_CAVALRY',
-        'HEAVY_CAVALRY'
-    ]
+    const building_unit_categories = ['MACHINERY'];
+    
     return (
         <div className="w-full p-4 rounded-lg text-black flex flex-col gap-2 bg-white">
             <div className="flex gap-2 mb-3">
@@ -111,4 +105,4 @@ const StrongholdInfoModalContent: React.FC<{}> = () => {
     );
 };
 
-export default StrongholdInfoModalContent;
+export default BlacksmithInfoModalContent;

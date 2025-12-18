@@ -1,2 +1,16 @@
 export { default as LoginBgImage } from './map-light.jpg';
+export { default as LoginBgImageDark } from './map.jpg';
+export { default as RustTexture } from './rust-texture.png';
 export { default as Map } from './map.jpg';
+export { default as CityImage } from './city.png';
+export { default as City2Image } from './city2.png';
+export { default as SeaRound } from './sea-round-image.png';
+export { default as SeaHex } from './sea-hex.png';
+export { default as PlainsRound } from './plains-round-image.png';
+export { default as PlainsHex } from './plains-hex.png';
+export { default as MountainRound } from './mountain-round-image.png';
+export { default as MountainHex } from './mountain-hex.png';
+export { default as ForestRound } from './forest-round-image.png';
+export { default as ForestHex } from './forest-hex.png';
+export { default as ShoreRound } from './shore-round-image.png';
+export { default as ShoreHex } from './shore-hex.png';

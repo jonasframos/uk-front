@@ -12,7 +12,6 @@ const PROFILE_ERRORS: Record<number, string> = {
   1022: "Senha de usuário incorreta",
 };
 
-
 const DUPLICATE_KEY_ERRORS: Record<string, string> = {
   "email": "Email já cadastrado",
   "cpf": "CPF já cadastrado",

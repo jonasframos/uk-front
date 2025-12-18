@@ -9,7 +9,6 @@ const PlayerInfo: React.FC<PlayerInfoProps> = ({ data }) => {
         <div className="w-full p-4 rounded-lg text-black flex flex-col gap-2 bg-white">
             <span>{data.username}</span>
             <hr />
-            <span>Points: {data.points}</span>
             <span>Cities: {data.cities.length}</span>
         </div>
     );

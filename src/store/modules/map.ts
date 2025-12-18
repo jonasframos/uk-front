@@ -10,6 +10,7 @@ export const createMapSlice: StateCreator<MapState> = (set, get) => ({
     is_loading_map_info: false,
     show_grid: localStorage.getItem('show_grid') === 'false' ? false : true,
     show_minimap: localStorage.getItem('show_minimap') === 'false' ? false : true,
+    show_legend: localStorage.getItem('show_legend') === 'false' ? false : true,
     selected_map: null,
     setLoadingMap(is_loading: boolean) {
       set(
@@ -56,6 +57,14 @@ export const createMapSlice: StateCreator<MapState> = (set, get) => ({
         produce((state) => {
           state.map.show_minimap = show_minimap;
           localStorage.setItem('show_minimap', show_minimap.toString());
+        })
+      );
+    },
+    setShowLegend(show_legend: boolean) {
+      set(
+        produce((state) => {
+          state.map.show_legend = show_legend;
+          localStorage.setItem('show_legend', show_legend.toString());
         })
       );
     }

@@ -1,6 +1,8 @@
 export interface Player {
   username: string;
-  points: number;
+  experience: number;
+  ranking: number;
+  level: number;
   cities: {
     x: number;
     y: number;

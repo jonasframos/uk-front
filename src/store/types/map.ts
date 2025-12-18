@@ -8,6 +8,11 @@ export interface Map {
 export interface Tile {
   terrain: string;
   is_buildable: boolean;
+  tier: string;
+  effects: {
+    type: string;
+    modifier: number;
+  }[],
   owned_by: any;
   coordinates: {
     x: number;
@@ -28,9 +33,11 @@ export interface MapState {
     selected_map: Map | null;
     show_grid: boolean;
     show_minimap: boolean;
+    show_legend: boolean;
     setLoadingMap(is_loading: boolean): void;
     getMap(): void;
     setShowGrid(show_grid: boolean): void;
     setShowMinimap(show_minimap: boolean): void;
+    setShowLegend(show_legend: boolean): void;
   };
 }
