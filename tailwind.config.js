@@ -18,7 +18,9 @@ module.exports = {
       wild_west: "#865952",
       burlywood: "#DEB887",
       old_paper: "#E0C9A6",
-      honey_gold: "#DDB57C"
+      honey_gold: "#DDB57C",
+      red: "#d00000ff",
+      orange: "#e68a00ff",
     },
     fontSize: {
       xxs: "0.5625rem", // 9px

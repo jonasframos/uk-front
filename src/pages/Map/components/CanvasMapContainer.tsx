@@ -13,6 +13,7 @@ import SelectedTileInfo from './SelectedTileInfo';
 
 
 const CanvasMapContainer: React.FC<{}> = () => {
+    const current_player = useStore((state) => state.player.current_player);
     const setLoadingMap = useStore((state) => state.map.setLoadingMap);
     const is_loading_map = useStore((state) => state.map.is_loading_map);
     const selected_map = useStore((state) => state.map.selected_map);
@@ -64,7 +65,11 @@ const CanvasMapContainer: React.FC<{}> = () => {
         const cacheKey = `city_${hexData.q}_${hexData.r}`;
         
         let cityImage = cityImages.current.get(cacheKey);
-        
+        let diplomacy = 'UNKNOWN';
+        if(current_player?.id === hexData.tile_info.owned_by.player?.id) diplomacy = 'OWN';
+        else if (hexData.q % 3 === 0) diplomacy = 'ALLY';
+        else if (hexData.q % 2 === 0) diplomacy = 'ENEMY';
+
         if (!cityImage) {
             cityImage = new Image();
             cityImage.crossOrigin = 'anonymous';
@@ -77,7 +82,7 @@ const CanvasMapContainer: React.FC<{}> = () => {
             cityImage.src = cityImageUrl;
             cityImages.current.set(cacheKey, cityImage);
         } else if (cityImage.complete) {
-            const imageSize = hexData.radius * 1.6;
+            const imageSize = hexData.radius * 1.3;
             ctx.drawImage(
                 cityImage,
                 hexData.centerX - imageSize / 2,
@@ -85,6 +90,25 @@ const CanvasMapContainer: React.FC<{}> = () => {
                 imageSize,
                 imageSize
             );
+            
+            const diplomacy_colors: any = {
+                'OWN': '#5fcb00ff',
+                'ALLY': '#6cafe7ff',
+                'ENEMY': '#ef4444',
+                'UNKNOWN': '#8e670cff'
+            };
+
+            ctx.filter = 'none';
+            const dotRadius = imageSize * 0.15;
+            const dotX = hexData.centerX + imageSize / 2 - dotRadius;
+            const dotY = hexData.centerY - imageSize / 2 + dotRadius;
+            ctx.beginPath();
+            ctx.arc(dotX, dotY, dotRadius, 0, Math.PI * 2);
+            ctx.fillStyle = diplomacy_colors[diplomacy];
+            ctx.fill();
+            ctx.strokeStyle = '#ffffff';
+            ctx.lineWidth = dotRadius * 0.5;
+            ctx.stroke();
         }
     }, []);
 
@@ -332,6 +356,42 @@ const CanvasMapContainer: React.FC<{}> = () => {
         minimapCtx.strokeStyle = '#d8d8d8ff';
         minimapCtx.lineWidth = 1;
         minimapCtx.strokeRect(viewportX, viewportY, viewportWidth, viewportHeight);
+
+        // Draw city dots on minimap according to diplomacy
+        try {
+            const hexesWithCities = hexagons.current.filter(hex => hex.tile_info?.owned_by?.city);
+            if (hexesWithCities.length > 0) {
+                const diplomacy_colors: any = {
+                    'OWN': '#5fcb00ff',
+                    'ALLY': '#6cafe7ff',
+                    'ENEMY': '#ef4444',
+                    'UNKNOWN': '#8e670cff'
+                };
+
+                hexesWithCities.forEach((hex) => {
+                    if (!hex || !hex.tile_info) return;
+
+                    let diplomacy = 'UNKNOWN';
+                    if (current_player?.id === hex.tile_info.owned_by.player?.id) diplomacy = 'OWN';
+                    else if (hex.q % 3 === 0) diplomacy = 'ALLY';
+                    else if (hex.q % 2 === 0) diplomacy = 'ENEMY';
+
+                    const dotX = offsetXMinimap + (hex.centerX * minimapScale);
+                    const dotY = offsetYMinimap + (hex.centerY * minimapScale);
+                    const dotRadius = Math.max(1.8, 1.8 * minimapScale);
+
+                    minimapCtx.beginPath();
+                    minimapCtx.arc(dotX, dotY, dotRadius, 0, Math.PI * 2);
+                    minimapCtx.fillStyle = diplomacy_colors[diplomacy] || diplomacy_colors['UNKNOWN'];
+                    minimapCtx.fill();
+                    minimapCtx.strokeStyle = '#ffffffcc';
+                    minimapCtx.lineWidth = Math.max(1, dotRadius * 0.3);
+                    minimapCtx.stroke();
+                });
+            }
+        } catch (err) {
+            console.error('Error drawing minimap city dots', err);
+        }
     }, [show_minimap]);
 
     const draw = useCallback(() => {
@@ -595,6 +655,46 @@ const CanvasMapContainer: React.FC<{}> = () => {
     }, [show_minimap, draw]);
 
     useEffect(() => {
+        const minimapCanvas = minimap_canvas_ref.current;
+        if (!minimapCanvas) return;
+
+        const handleMinimapClick = (e: MouseEvent) => {
+            const image = image_ref.current;
+            const canvas = canvas_ref.current;
+            if (!image || !canvas) return;
+
+            const rect = minimapCanvas.getBoundingClientRect();
+            const clickX = e.clientX - rect.left;
+            const clickY = e.clientY - rect.top;
+
+            const canvasX = clickX * (minimapCanvas.width / rect.width);
+            const canvasY = clickY * (minimapCanvas.height / rect.height);
+
+            const minimapScale = Math.min(
+                minimapCanvas.width / image.width,
+                minimapCanvas.height / image.height
+            );
+
+            const scaledWidth = image.width * minimapScale;
+            const scaledHeight = image.height * minimapScale;
+            const offsetXMinimap = (minimapCanvas.width - scaledWidth) / 2;
+            const offsetYMinimap = (minimapCanvas.height - scaledHeight) / 2;
+
+            const imageX = (canvasX - offsetXMinimap) / minimapScale;
+            const imageY = (canvasY - offsetYMinimap) / minimapScale;
+
+            offsetX.current = canvas.width / 2 - imageX * scale.current;
+            offsetY.current = canvas.height / 2 - imageY * scale.current;
+
+            constrainViewBounds();
+            draw();
+        };
+
+        minimapCanvas.addEventListener('click', handleMinimapClick);
+        return () => minimapCanvas.removeEventListener('click', handleMinimapClick);
+    }, [constrainViewBounds, draw]);
+
+    useEffect(() => {
         if (!is_loading_map && show_minimap) {
             const minimapCanvas = minimap_canvas_ref.current;
             if (minimapCanvas) {
@@ -761,7 +861,7 @@ const CanvasMapContainer: React.FC<{}> = () => {
                 <div style={{
                     position: 'fixed',
                     left: `${Math.min(mousePosition.x + 25, window.innerWidth - 370)}px`,
-                    top: `${Math.min(mousePosition.y + 25, window.innerHeight - 200)}px`,
+                    top: `${Math.min(mousePosition.y + 25, window.innerHeight - 320)}px`,
                     pointerEvents: 'none',
                     zIndex: 2000,
                     width: '280px'
@@ -775,7 +875,7 @@ const CanvasMapContainer: React.FC<{}> = () => {
                     bottom: '80px',
                     left: '30px',
                     pointerEvents: 'auto',
-                    zIndex: 2000,
+                    zIndex: 1000,
                     width: '250px'
                 }}>
                     <SelectedTileInfo data={selectedHexagon} />

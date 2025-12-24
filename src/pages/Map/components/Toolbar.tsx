@@ -30,7 +30,7 @@ const Toolbar: React.FC<ToolbarProps> = ({ canvas_ref }) => {
                 bottom: '30px',
                 right: '30px',
                 pointerEvents: 'auto',
-                zIndex: 2000,
+                zIndex: 3000,
                 backgroundColor: 'rgba(253, 236, 217, 0.2)',
                 padding: '4px',
                 borderRadius: '8px',

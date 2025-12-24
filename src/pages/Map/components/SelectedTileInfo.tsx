@@ -10,6 +10,7 @@ import {
 import IconButton from "../../../components/Buttons/IconButton";
 import { MapTile } from "../../../store/types/map";
 import TileInfo from "./TileInfo";
+import { useStore } from "../../../store/useStore";
 
 export interface SelectedTileInfoProps {
     data: MapTile;
@@ -58,18 +59,21 @@ export const effects_description: { [key: string]: string } = {
 
 const SelectedTileInfo: React.FC<SelectedTileInfoProps> = ({ data }) => {
     const navigate = useNavigate();
+    const current_player = useStore((state) => state.player.current_player);        
 
-    const handleShowCity = () => {
-        
+    const handleShowCity = (id: string) => {
+        localStorage.setItem('selected_city', id);
         navigate('/city');
     }
+
+    console.log(data, current_player)
     
     return (
         <div>
             <TileInfo data={data} />
             <div className="w-full p-2 rounded-lg flex gap-2 bg-white text-black border-solid border-2 border-black">
+                { data.tile_info?.owned_by?.player?.id === current_player?.id && <IconButton tooltip_text="Show City" iconClassName={'w-[25px] h-[25px]'} icon={CityIcon} onClick={() => handleShowCity(data.tile_info?.owned_by?.city?.id)} /> }
                 <IconButton tooltip_text="Troop Command" icon={AttackIcon} onClick={() => alert('Attack button clicked')} />
-                <IconButton tooltip_text="Show City" iconClassName={'w-[25px] h-[25px]'} icon={CityIcon} onClick={() => navigate('/city')} />
             </div>
         </div>
     );

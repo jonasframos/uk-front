@@ -57,6 +57,32 @@ const TileInfo: React.FC<TileInfoProps> = ({ data }) => {
     const tile_image = terrain_images[data.tile_info.terrain];
     return (
         <div className="w-full p-2 rounded-lg flex flex-col gap-2 bg-white text-black border-solid border-2 border-black">
+             {
+                data.tile_info.owned_by && (
+                    <div className="flex flex-col gap-1">
+                        <div className="flex justify-between">
+                            <span className="font-semibold">{data.tile_info.owned_by.city.name} ({data.tile_info.owned_by.city.experience})</span>
+                            <span className="font-bold text-sm">Lv. {data.tile_info.owned_by.city.level}</span>
+                        </div>
+                        <hr className="border-gray_3" />
+                        { data.tile_info.owned_by.player ? 
+                            (
+                                <div className="flex flex-col">
+                                    <div className="flex justify-between">
+                                        <span>{data.tile_info.owned_by.player.username}</span>
+                                        <span className="font-bold text-sm" >#{data.tile_info.owned_by.player.position}</span>
+                                    </div>
+                                    <div className="flex justify-between">
+                                        <span>{data.tile_info.owned_by.player.experience}</span>
+                                        <span className="font-bold text-sm" >Lv. {data.tile_info.owned_by.player.level}</span>
+                                    </div>
+                                </div>
+                            ) : <span>Nenhum</span> 
+                        }
+                        <hr className="border-gray_3" />
+                    </div>
+                )
+            }
             <div className="flex justify-between">
                 <div className="flex flex-col">
                     <span className="text-lg">{terrain_names[data.tile_info.terrain]}</span>
@@ -68,11 +94,11 @@ const TileInfo: React.FC<TileInfoProps> = ({ data }) => {
                     <TierText tier={data.tile_info.tier} />
                 </div>
             </div>
-            <hr />
             <div className="flex flex-col gap-1">
                 {
                     data.tile_info?.effects?.length > 0 ? (
                         <div>
+                            <hr className="mb-2" />
                             <span className="font-bold">Efeitos:</span>
                             <table className="mb-2">
                                 {data.tile_info.effects.map((effect, index) => (
@@ -84,26 +110,10 @@ const TileInfo: React.FC<TileInfoProps> = ({ data }) => {
                                     </tr>
                                 ))}
                             </table>
-                            <hr className="border-gray_3" />
                         </div>
                     ) : null
                 }
             </div>
-            {
-                data.tile_info.owned_by ? (
-                    <div className="flex flex-col gap-1">
-                        <span className="font-bold">Proprietário:</span>
-                        { data.tile_info.owned_by.player ? 
-                            (
-                                <div className="flex flex-col">
-                                    <span>Jogador: {data.tile_info.owned_by.player.username}</span>
-                                    <span>Pontuação: {data.tile_info.owned_by.player.points}</span>
-                                </div>
-                            ) : <span>Nenhum</span> 
-                        }
-                        </div>
-                ) : <span className="font-bold">Sem Proprietário</span>
-            }
             {/* <span>Informações</span>
             <span>Coordenadas: {data.q}, {data.r}</span>
             <hr />

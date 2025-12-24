@@ -9,6 +9,7 @@ import BuildingInfoModal from './BuildingInfoModal';
 import useModal from '../../../hooks/useModal';
 import BuildingLabel from './BuildingLabel';
 import Countdown from '../../../components/Countdown/Countdown';
+import Toolbar from './Toolbar';
 
 const buildings = [
     {
@@ -345,7 +346,7 @@ const CanvasCityContainer: React.FC<{}> = () => {
             resizeCanvas();
             setLoadingCity(false);
         };
-        
+
         image.src = image_url;
 
         canvas.addEventListener('mousemove', handleMouseMove);
@@ -385,6 +386,7 @@ const CanvasCityContainer: React.FC<{}> = () => {
                     Loading City...
                 </div>
             )}
+            {!is_loading_city && <Toolbar />}
             <canvas 
                 ref={canvas_ref} 
                 style={{ 
@@ -394,6 +396,7 @@ const CanvasCityContainer: React.FC<{}> = () => {
                     cursor: hoveredBuilding ? 'pointer' : 'default'
                 }}
             />
+
             {selected_city?.buildings.map(cityBuilding => {
                 const building_def = buildings.find(b => b.type === cityBuilding.type);
                 const building_under_construction = selected_city?.builders?.queue?.find(b => b.type === cityBuilding.type);

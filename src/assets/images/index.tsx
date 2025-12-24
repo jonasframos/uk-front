@@ -1,6 +1,6 @@
 export { default as LoginBgImage } from './map-light.jpg';
 export { default as LoginBgImageDark } from './map.jpg';
-export { default as RustTexture } from './rust-texture.png';
+export { default as RustTexture } from './seamless.png';
 export { default as Map } from './map.jpg';
 export { default as CityImage } from './city.png';
 export { default as City2Image } from './city2.png';

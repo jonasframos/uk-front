@@ -6,6 +6,13 @@ export interface City {
     x: number;
     y: number;
   };
+  tile: {
+    tier: string;
+    effects?: {
+      type: string;
+      modifier: number;
+    }[];
+  }
   buildings: CityBuilding[];
   level: number;
   points: number;

@@ -20,7 +20,7 @@ const MapGeneral: React.FC<{}> = () => {
     
     return (
       <div className='flex flex-col h-full w-full font-sans' style={{ backgroundImage: `url(${RustTexture})`, backgroundSize: '', backgroundPosition: 'center' }}>
-        <div className='w-full min-h-[110px] h-[10%] flex gap-2 p-1 text-black border-solid border-black border-2'>
+        <div className='w-full h-[10%] min-h-[110px] flex gap-2 p-1 text-black border-solid border-black border-2'>
           <div className='flex flex-col bg-old_paper px-2 py-1 border-solid border-black border-2 gap-1 rounded-md'>
             <div className="flex justify-between gap-1">
               <span className="font-bold text-sm text-gray-500">{selected_map?.name}</span>
@@ -28,7 +28,7 @@ const MapGeneral: React.FC<{}> = () => {
             </div>
             <div className="flex justify-between gap-1">
               <span className="text-lg text-gray-500">{current_player?.username}</span>
-              <span className="text-lg font-bold">{current_player?.level}</span>
+              <span className="text-lg font-semibold">Lv. {current_player?.level}</span>
             </div>
             <div className="min-w-[200px] w-full bg-white rounded-full h-2">
               <div className="bg-rust h-2 rounded-full" style={{ width: '45%' }}></div>
@@ -40,15 +40,15 @@ const MapGeneral: React.FC<{}> = () => {
           </div>
           <div className="flex flex-col w-[40px]">
             <IconButton tooltip_text="Ranking" iconClassName={'w-[40px] h-[42px]'} icon={RankingIcon} onClick={() => alert('Ranking')} />
-            <IconButton tooltip_text="Profile" iconClassName={'w-[24px] h-[28px]'} icon={ProfileIcon} onClick={() => alert('Profile')} />
+            <IconButton tooltip_text="Profile" iconClassName={'w-[22px] h-[29px]'} icon={ProfileIcon} onClick={() => alert('Profile')} />
           </div>
         </div>
-        <div className='w-full h-[85%] relative overflow-hidden'>
+        <div className='w-full h-[85%] min-h-[500px] relative overflow-hidden'>
           {(selected_map && current_player) ? <CanvasMapContainer /> : <div>Loading map...</div>}
         </div>
-        <div  className='w-full h-[5%] min-h-[30px] flex justify-between gap-2'>
+        <div  className='w-full h-[5%] min-h-[30px] flex justify-between items-center p-1'>
           <div></div>
-          <div>Server Time: 01/03/2025<br/>12:54:18</div>
+          <div className='flex flex-col bg-old_paper py-1 px-4 border-black border-2 rounded-md text-sm font-semibold text-center '>01/03/2025<br/>12:54:18</div>
         </div>
       </div>
     );
